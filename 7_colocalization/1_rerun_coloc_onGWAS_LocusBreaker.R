@@ -1,21 +1,14 @@
-##Writing new coloc script with locus breaker windows
-##use module load HGI/softpack/users/wl2/fine_mapping/1 - should now run with SLEmap_HJ-18
-##also runs bulklike
-###this does not use the functions for coloc like before
-###this still uses the gwas and eQTL data prepared by /lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Scripts/14_colocalization/01_data_preparation_gwas and /lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Scripts/14_colocalization/02_data_preparation_eqtl
+##coloc script with locus breaker windows
 
 library(tidyverse)
 library(data.table)
 library(coloc)
 
-#DIR_functions="/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Scripts/23_locus_breaker_coloc"
-GWAS_input= "/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/14_colocalization/inputs/gwas/"
-DIR_output="/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/23_locus_breaker_coloc/outputs"
-eQTL_nominal_p_source="/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsort_allSNP/"
-eQTL_nominal_p_source_allcells="/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsoft_allSNP_allcells/"
-DIR_MAIN="/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/wl2/colocalization"
+GWAS_input= "/path/coloc/inputs/gwas/"
+DIR_output="/path/coloc/outputs"
+eQTL_nominal_p_source="/path/eQTLresults/"
+DIR_MAIN="/path/coloc"
 
-#window=500000 
 GWAS_threshold=1e-5
 minSNPs = 1
 
@@ -94,7 +87,7 @@ coloc_between_eqtl_and_gwas <- function(eQTL_INPUT, GWAS_INPUT, GWAS_ID, N, s, l
                                    GWAShit_pos=GWAShit_pos, 
                                    gene_id=gene_id, 
                                    locusStart=locusStart,
-                                   locusEnd=locusEnd) #contains duplicates
+                                   locusEnd=locusEnd)
   dim(eqtl_window_1)
   in_eqtl_window <- eqtl_window_1 %>% 
     dplyr::arrange(., pval_nominal)
@@ -144,9 +137,6 @@ coloc_between_eqtl_and_gwas <- function(eQTL_INPUT, GWAS_INPUT, GWAS_ID, N, s, l
     dplyr::arrange(POS)
   dim(eqtl_window_1)
   dim(gwas_window_1)
-  
-  # b <- data.frame(d1=eqtl_window_1$POS,
-  #                 d2=gwas_window_1$POS)
   
   all(eqtl_window_1$variant_id==gwas_window_1$variant_id)
   all(eqtl_window_1$POS==gwas_window_1$POS)
@@ -229,30 +219,24 @@ if (!dir.exists(paste0(DIR_OUT, "/sig_checksigeQTL_checkallele"))) {
 GWAS_INPUT <- fread (paste0(GWAS_input,GWAS_ID,"/",GWAS_ID,"_for_eqtl.txt.gz")) %>%
   as.data.frame() %>%
   dplyr::rename(., variant_id_v2=variant_id) %>%
-  dplyr::mutate(variant_id = paste0(chr, "_", pos))# 7071163
+  dplyr::mutate(variant_id = paste0(chr, "_", pos))
 
 GWAS_INPUT <- GWAS_INPUT[!((GWAS_INPUT$chr == "chr6") & (GWAS_INPUT$pos > 25000000)&(GWAS_INPUT$pos < 34000000)),] 
 dim(GWAS_INPUT)
-# 7018195
 
 GWAS_INPUT <- GWAS_INPUT[is.na(GWAS_INPUT$variant_id) == F,]
 
 #### identify GWAS peaks and window
-# locusbreaker <- read.csv("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/23_locus_breaker_coloc/gwashit_locusbreaker.csv")
-# names(locusbreaker) <- dplyr::recode(names(locusbreaker),
-#                                      variantId = "variant_id_v2",
-#                                      chromosome = "chr",
-#                                      position = "pos",
-#                                      pValue = "p_value")
-# locusbreaker$variant_id <- paste0(locusbreaker$chr,"_",locusbreaker$pos)
-# locusbreaker <- locusbreaker[!((locusbreaker$chr == "chr6") & (locusbreaker$pos > 25000000)&(locusbreaker$pos < 34000000)),] 
-# write.csv(locusbreaker,"/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/23_locus_breaker_coloc/gwashit_locusbreaker_forinput.csv",row.names=F)
-
-locusbreaker <- read.csv("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/23_locus_breaker_coloc/gwashit_locusbreaker_forinput.csv")
+locusbreaker <- read.csv("/path/coloc/gwashit_locusbreaker.csv")
+names(locusbreaker) <- dplyr::recode(names(locusbreaker),
+                                      variantId = "variant_id_v2",
+                                      chromosome = "chr",
+                                      position = "pos",
+                                      pValue = "p_value")
+locusbreaker$variant_id <- paste0(locusbreaker$chr,"_",locusbreaker$pos)
+locusbreaker <- locusbreaker[!((locusbreaker$chr == "chr6") & (locusbreaker$pos > 25000000)&(locusbreaker$pos < 34000000)),] 
 
 #### run coloc ####
-#cell_types <- "All"
-#cell_types <- "CM_CD4_T_cells"
 cell_types <- c("CD56Bright_NK_cells","CD56Dim_NK_cells","Classical_Monocytes","CM_CD4_T_cells","Cytotoxic_CD4_T_cells","EM_CD4_T_cells","Naive_CD4_T_cells","Regulatory_CD4_T_cells","CM_CD8_T_cells","EM_CD8_T_cells", "Naive_CD8_T_cells","TEMRA","DN_T_cells","Memory_B_cells","Naive_B_cells","All")
 
 for(cell_type in cell_types){
@@ -270,11 +254,7 @@ for(cell_type in cell_types){
   dim(cis_eqtl)
   
   ## add nominal pval threshold
-  if(cell_type == "All"){
-    nominal_pval_thres <- read.table(paste0(eQTL_nominal_p_source_allcells,"/results/TensorQTL_eQTLS/dMean__",cell_type,"_all/OPTIM_pcs/base_output/base/Cis_eqtls_qval.tsv"),fill=T,header=T)
-  }else{
-    nominal_pval_thres <- read.table(paste0(eQTL_nominal_p_source,cell_type,"/results/TensorQTL_eQTLS/dMean__",cell_type,"_all/OPTIM_pcs/base_output/base/Cis_eqtls_qval.tsv"),fill=T,header=T)
-  }
+  nominal_pval_thres <- read.table(paste0(eQTL_nominal_p_source,cell_type,"/results/TensorQTL_eQTLS/dMean__",cell_type,"_all/OPTIM_pcs/base_output/base/Cis_eqtls_qval.tsv"),fill=T,header=T)
   cis_eqtl$nominal_pval_thres <- nominal_pval_thres$pval_nominal_threshold[match(cis_eqtl$phenotype_id,nominal_pval_thres$phenotype_id)]
   
   ## 1-1) conditional output : only 1 eSNP per eGene
@@ -330,7 +310,6 @@ for(cell_type in cell_types){
   
   ## define a name of output file
   
-  #OUT_FILE <- paste0(DIR_OUT, "/all/", cell_type, ".txt")
   OUT_FILE <- paste0(DIR_OUT, "/all_checksigeQTL_checkallele/", cell_type, ".txt")
   print(OUT_FILE)
   out_to_write <- data.frame(cell_type = character(),
@@ -375,11 +354,9 @@ for(cell_type in cell_types){
     }
     
     ## check if the eQTL lead snp is within 500kb +- a gwas hit
-    #GWAShit <- GWAS_hits[GWAS_hits$chr == lead_snp_chr,][abs(GWAS_hits$pos[GWAS_hits$chr == lead_snp_chr] - lead_snp_pos) <= window, ]
     GWAShit <- locusbreaker[locusbreaker$chr == lead_snp_chr & locusbreaker$locusStart <= lead_snp_pos & locusbreaker$locusEnd >= lead_snp_pos, ]
 
     if(nrow(GWAShit) > 0){
-        # i can be either 1 or 2 (two GWAS hits within +-500kb of eQTL lead snp)
         GWAShit_chr <- GWAShit$chr[1]
         GWAShit_pos <- GWAShit$pos[1]
         locusStart <- GWAShit$locusStart[1]
@@ -406,8 +383,6 @@ for(cell_type in cell_types){
                                      eQTL_rank=cis_eqtl$rank[i],
                                      gwas_inwindow=1,
                                      status="tested for coloc")
-          # out_to_write <- data.frame(out[[2]], 
-          #                            n_variants_for_coloc=length(out$variants_for_coloc))
           print(out_to_write)
           
           write.table(out_to_write, 

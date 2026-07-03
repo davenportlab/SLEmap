@@ -6,9 +6,8 @@ library(ggpubr)
 library(ggplot2)
 
 ##read in coloc results
-#GWAS_ID <- "GCST003156"
 GWAS_ID <- "GCST90270940"
-DIR_MAIN="/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/23_locus_breaker_coloc/outputs"
+DIR_MAIN="/path/coloc/outputs"
 
 coloc_results <- read.table(paste0(DIR_MAIN,"/",GWAS_ID,"/all_checksigeQTL_checkallele/coloc_output_with_gene_name.txt"),sep="\t",fill=T,header=T)
 
@@ -47,7 +46,7 @@ dat$lead_H4_variant_pval <- NA
 dat$lead_H4_variant_GTF_REF <- NA
 dat$lead_H4_variant_GTF_ALT <- NA
 
-EQTL_input="/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/wl2/colocalization/02_2.load_eqtls_data/"
+EQTL_input="/path/"
 
 for(i in 1:nrow(dat)){
   celltype_use <- dat$cell_type[i]
@@ -61,32 +60,31 @@ for(i in 1:nrow(dat)){
     nominal <- nominal[(nominal$phenotype_id == gene_id_use) & (nominal$variant_id == lead_H4_variant_use) & (gsub("(chr.*\\_\\d+)\\_.*\\_.*", "\\1", nominal$independent_variant) == lead_snp_use),]
     dat$lead_H4_variant_slope[i] <- nominal$slope
     dat$lead_H4_variant_pval[i] <- nominal$pval_nominal
-    dat$lead_H4_variant_GTF_ALT[i] <- nominal$GTF_REF ### these were flipped as a mistake by Wan when she made coloc input files. Checked with the vcf files. the slope is not flipped. checked with nominal p-val eQTL result files
-    dat$lead_H4_variant_GTF_REF[i] <- nominal$GTF_ALT ### these were flipped as a mistake by Wan when she made coloc input files. Checked with the vcf files. the slope is not flipped. checked with nominal p-val eQTL result files
+    dat$lead_H4_variant_GTF_ALT[i] <- nominal$GTF_REF ### these were flipped when coloc input files were created. REF/ALT Checked with the vcf and gtf files. the slope is not flipped. checked with nominal p-val eQTL result files
+    dat$lead_H4_variant_GTF_REF[i] <- nominal$GTF_ALT ### these were flipped when coloc input files were created. REF/ALT Checked with the vcf and gtf files. the slope is not flipped. checked with nominal p-val eQTL result files
     
   }else{
     nominal <- fread(paste0(EQTL_input,celltype_use,"/cis_nominal_",celltype_use,".txt.gz"))
     nominal <- nominal[(nominal$phenotype_id == gene_id_use) & (nominal$chr_pos == lead_H4_variant_use),]
     dat$lead_H4_variant_slope[i] <- nominal$slope
     dat$lead_H4_variant_pval[i] <- nominal$pval_nominal
-    dat$lead_H4_variant_GTF_ALT[i] <- nominal$GTF_REF ### these were flipped as a mistake by Wan when she made coloc input files. Checked with the vcf files. the slope is not flipped. checked with nominal p-val eQTL result files
-    dat$lead_H4_variant_GTF_REF[i] <- nominal$GTF_ALT ### these were flipped as a mistake by Wan when she made coloc input files. Checked with the vcf files. the slope is not flipped. checked with nominal p-val eQTL result files
-    
+    dat$lead_H4_variant_GTF_ALT[i] <- nominal$GTF_REF ### these were flipped when coloc input files were created. REF/ALT Checked with the vcf and gtf files. the slope is not flipped. checked with nominal p-val eQTL result files
+    dat$lead_H4_variant_GTF_REF[i] <- nominal$GTF_ALT ### these were flipped when coloc input files were created. REF/ALT Checked with the vcf and gtf files. the slope is not flipped. checked with nominal p-val eQTL result files
   }
 }
 rm(nominal)
 
 ### check if lead H4 variant alternative allele matches the gwas effect (risk) allele
-GWAS_input= "/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/14_colocalization/inputs/gwas/"
+GWAS_input= "/path/coloc/inputs/gwas/"
 GWAS_INPUT <- fread (paste0(GWAS_input,GWAS_ID,"/",GWAS_ID,"_for_eqtl.txt.gz")) %>%
   as.data.frame() %>%
   dplyr::rename(., variant_id_v2=variant_id) %>%
-  dplyr::mutate(variant_id = paste0(chr, "_", pos))# 7071163
+  dplyr::mutate(variant_id = paste0(chr, "_", pos))
 
 GWAS_INPUT <- GWAS_INPUT[!((GWAS_INPUT$chr == "chr6") & (GWAS_INPUT$pos > 25000000)&(GWAS_INPUT$pos < 34000000)),] 
 head(GWAS_INPUT)
-dat$lead_H4_variant_GWAS_effect_allele <- GWAS_INPUT$other_allele[match(dat$lead_H4_variant, GWAS_INPUT$variant_id)] ### these were flipped as a mistake by Wan when she made coloc input files. Checked with the original gwas files.
-dat$lead_H4_variant_GWAS_other_allele <- GWAS_INPUT$effect_allele[match(dat$lead_H4_variant, GWAS_INPUT$variant_id)] ### these were flipped as a mistake by Wan when she made coloc input files. Checked with the original gwas files.
+dat$lead_H4_variant_GWAS_effect_allele <- GWAS_INPUT$other_allele[match(dat$lead_H4_variant, GWAS_INPUT$variant_id)]  ### these were flipped when coloc input files were created. Checked with the original gwas files.
+dat$lead_H4_variant_GWAS_other_allele <- GWAS_INPUT$effect_allele[match(dat$lead_H4_variant, GWAS_INPUT$variant_id)]  ### these were flipped when coloc input files were created. Checked with the original gwas files.
 all(dat$lead_H4_variant_GWAS_effect_allele == dat$lead_H4_variant_GTF_ALT) #should all be true, inspect if not, if the alleles are flipped, slope * -1
 
 dat$slope_forplotting <- dat$lead_H4_variant_slope
@@ -113,9 +111,7 @@ ggplot(dat,aes(x=reorder(gwashit_forplot, Ord1), y = celltype_forplots, color = 
   scale_size(range = c(3, 5))+xlab("GWAS hit") +ylab("Cell type")+ coord_flip()+ggtitle(paste0("Coloc with ",GWAS_ID," (PP.H4>0.8)(dots=lead PPH4 eQTLs>0.8)"))
 
 ggsave(paste0(DIR_MAIN,"/0_plots/colocsummary_dotplot_",GWAS_ID,"_wo_bulklike_checksigeQTL.pdf"),height=15,width=11)
-write.csv(dat,paste0(DIR_MAIN,"/1_csvfiles/coloc_sigresults_",GWAS_ID,"_checksigeQTL_w17q21.csv"),row.names=F)
-write.csv(dat[!dat$gwas_hit %in% c("chr17_45436075","chr17_46751565"),],paste0(DIR_MAIN,"/1_csvfiles/coloc_sigresults_",GWAS_ID,"_checksigeQTL.csv"),row.names=F)
-
+write.csv(dat,paste0(DIR_MAIN,"/1_csvfiles/coloc_sigresults_",GWAS_ID,"_checksigeQTL.csv"),row.names=F)
 
 ## dotplot with PPH4
 dat <- read.csv(paste0(DIR_MAIN,"/1_csvfiles/coloc_sigresults_",GWAS_ID,"_checksigeQTL.csv"))
@@ -134,75 +130,3 @@ ggplot(dat,aes(x=reorder(gwashit_forplot, Ord1), y = celltype_forplots, color = 
   theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
   scale_size(range = c(2, 6))+xlab("GWAS hit") +ylab("Cell type")+ coord_flip()+ggtitle(paste0("Coloc with ",GWAS_ID))
 ggsave(paste0(DIR_MAIN,"/0_plots/colocsummary_dotplot_",GWAS_ID,"_PPH4_checksigeQTL.pdf"),height=14,width=10)
-
-
-### bar plot for num sig coloc
-
-dat <- read.csv(paste0(DIR_MAIN,"/1_csvfiles/coloc_sigresults_",GWAS_ID,"_checksigeQTL.csv"))
-
-numcoloc <- as.data.frame(table(dat$cell_type))
-numcoloc$cellgroup_forplots <- dat$cellgroup_forplots[match(numcoloc$Var1,dat$cell_type)]
-numcoloc$cellgroup_forplots[numcoloc$Var1 == "All"] <- "All"
-numcoloc$cellgroup_forplots <- factor(numcoloc$cellgroup_forplots, levels=c("CD4 T","CD8 T","Other T","B","Mono","NK","All"))
-numcoloc$Var1 <- gsub("_"," ",numcoloc$Var1)
-numcoloc$Var1 <- factor(numcoloc$Var1, levels=c("Naive CD4 T cells","CM CD4 T cells","EM CD4 T cells","Cytotoxic CD4 T cells","Regulatory CD4 T cells","Naive CD8 T cells","CM CD8 T cells","EM CD8 T cells","TEMRA","DN T cells","Naive B cells","Memory B cells","Classical Monocytes","CD56Bright NK cells","CD56Dim NK cells","All"))
-
-library(forcats)
-ggplot(numcoloc, aes(x=fct_rev(Var1),y=Freq))+geom_bar(stat = "identity")+theme_classic()+ theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +facet_grid(cellgroup_forplots~.,scales = "free", space = "free")+xlab("") +ylab("Number of colocalized GWAS hits")+ theme(legend.position="none")+coord_flip()
-
-ggsave(paste0(DIR_MAIN,"/0_plots","/numcoloc_",GWAS_ID,"_checksigeQTL_wo17q21.pdf"), width=6,height=6)
-
-###correlation between numeQTLs and colocs
-conditionaleQTL <- read.csv("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsort_allSNP/1_csvfiles/conditionaleQTL_simple.csv")
-numeQTL <- as.data.frame(table(conditionaleQTL$celltype))
-
-library(scales)
-library(ggrepel)
-library(ggpubr)
-numcoloc$numeQTL <- numeQTL$Freq[match(numcoloc$Var1,gsub("_"," ",numcoloc$Var1))]
-ggplot(numcoloc, aes(x=numeQTL, y=Freq)) + geom_point(aes(color=cellgroup_forplots))+ scale_x_continuous(labels = label_comma())+theme_classic()+geom_text_repel(aes(label = Var1),segment.color = NA,max.overlaps = 1,nudge_x = -0.2, direction = "y")+xlab("Number of conditional eQTLs")+ylab("Number of colocalized GWAS hits")+scale_color_brewer(palette="Set2")+stat_cor(method="pearson")
-ggsave(paste0(DIR_MAIN,"/0_plots","/numcoloc_corr_",GWAS_ID,"_checksigeQTL.pdf"),width=7,height=6)
-
-#### stacked bar plot for egene and coloc gene
-dat <- read.csv(paste0(DIR_MAIN,"/1_csvfiles/coloc_sigresults_",GWAS_ID,"_checksigeQTL.csv"))
-dat <- dat[!duplicated(paste0(dat$cell_type,dat$gene_symbol)),]
-all <- dat[dat$cell_type == "All",]
-all <- all$gene_symbol
-celltypelevel <- dat[dat$cell_type != "All",]
-celltypelevel <- celltypelevel[!duplicated(celltypelevel$gene_symbol),]
-celltypelevel <- celltypelevel$gene_symbol
-shared <- length(intersect(all, celltypelevel))
-onlybulklike <- length(all)-shared
-onlysc <- length(celltypelevel)-shared
-
-group <- c("Only in all-PBMC", "Shared", "Only in cell type-level", "Only in all-PBMC", "Shared", "Only in cell type-level")
-num <- c(1853,2649,1154,onlybulklike,shared,onlysc)
-level <- c("eGenes", "eGenes", "eGenes", "Genes colocalized", "Genes colocalized", "Genes colocalized")
-shared <- data.frame(group, num, level)
-shared$group <- factor(shared$group,levels=c("Only in cell type-level","Shared","Only in all-PBMC"))
-
-p1 <- shared[shared$level == "eGenes",] %>%
-  mutate(pct= prop.table(num) * 100) %>%
-  ggplot() + aes(level, num, fill=group) +
-  geom_bar(stat="identity",width=1) +
-  ylab("Number of genes") +
-  geom_text(aes(label=paste0(num," (",sprintf("%1.f", pct),"%",")")),
-            position=position_stack(vjust=0.5),size=3) +
-  theme_classic()+scale_fill_manual(values=c("#84afd1","#97c98f", "#fc9285"))+xlab("")
-p2 <- shared[shared$level == "Genes colocalized",] %>%
-  mutate(pct= prop.table(num) * 100) %>%
-  ggplot() + aes(level, num, fill=group) +
-  geom_bar(stat="identity",width=1) +
-  ylab("Number of genes") +
-  geom_text(aes(label=paste0(num," (",sprintf("%1.f", pct),"%",")")),
-            position=position_stack(vjust=0.5),size=3) +
-  theme_classic()+scale_fill_manual(values=c("#84afd1","#97c98f", "#fc9285"))+xlab("")
-ggarrange(p1,p2,ncol=2,common.legend = T,legend="right",align="v")
-ggsave(DIR_MAIN,"/0_plots/bulklike_prop_wo17q.21.pdf",width=4.5,height=5)
-
-
-#### count how many unique gwas loci colocalized in one celltype
-dat <- dat[dat$celltype_forplots != "All",]
-length(unique(dat$Var1))
-gwashit_count <- as.data.frame(table(dat$id))
-table(gwashit_count$Freq)

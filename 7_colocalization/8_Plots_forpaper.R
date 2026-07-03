@@ -8,27 +8,10 @@ library(locuszoomr)
 library(EnsDb.Hsapiens.v86)
 library(forcats)
 
-coloc <- read.csv("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/23_locus_breaker_coloc/outputs/1_csvfiles/coloc_sigresults_GCST90270940_checksigeQTL.csv")
-
-### calculate proportion of coloc hits over significant independent eQTLs by cell type
-eGene_summary <- read.csv("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsort_allSNP/1_csvfiles/eGenesummary_wBulklike.csv")
-coloc_ct <- as.data.frame(table(coloc$cell_type))
-eGene_summary$n_coloc <- coloc_ct$Freq[match(eGene_summary$celltype,coloc_ct$Var1)]
-eGene_summary$propcoloc <- eGene_summary$n_coloc / eGene_summary$numGenes_conditionalsig 
-eGene_summary$propcoloc_eGene <- eGene_summary$n_coloc / eGene_summary$numGenes_sig
-
-otar <- read.csv("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/19_unique_coloc/coloc_output_otar_26.03.csv")
-otar_ct <- as.data.frame(table(otar$cell_type,otar$otar_overlap))
-eGene_summary$novel_coloc <- otar_ct[otar_ct$Var2 == T,]$Freq[match(eGene_summary$celltype,otar_ct$Var1)]
-eGene_summary$propnovelcoloc <- eGene_summary$novel_coloc / eGene_summary$n_coloc
-plot(eGene_summary$numGenes_sig,eGene_summary$n_coloc)
-
-conditional_eQTL <- read.csv("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsort_allSNP/1_csvfiles/conditionaleQTL_simple.csv")
-table(conditional_eQTL$celltype)
-length(unique(conditional_eQTL$phenotype_id))
+coloc <- read.csv("/path/coloc/outputs/1_csvfiles/coloc_sigresults_GCST90270940_checksigeQTL.csv")
 
 #get GWAS
-GWAS_input= "/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/14_colocalization/inputs/gwas/"
+GWAS_input= "/path/coloc/inputs/gwas/"
 GWAS_ID="GCST90270940"
 GWAS_INPUT <- fread (paste0(GWAS_input,GWAS_ID,"/",GWAS_ID,"_for_eqtl.txt.gz")) %>%
   as.data.frame() %>%
@@ -51,7 +34,7 @@ GWAS_input_plot <- GWAS_input_plot[GWAS_input_plot$pos < pos_end,]
 GWAS_input_plot <- GWAS_input_plot[GWAS_input_plot$pos > pos_start,]
 
 ##allcells - NFKB1
-EQTL_input <- "/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsoft_allSNP_allcells/results/TensorQTL_eQTLS/dMean__All_all/OPTIM_pcs/base_output/base/"
+EQTL_input <- "/path/eQTLresults/results/TensorQTL_eQTLS/dMean__All_all/OPTIM_pcs/base_output/base/"
 nominal <- fread(paste0("grep ",gene_id," ",EQTL_input,"cis_nominal1.cis_qtl_pairs.",gene_chr,".tsv"))
 colnames(nominal) <- c("phenotype_id","variant_id","start_distance","af","ma_samples","ma_count","pval_nominal","slope","slope_se")
 nominal$POS <- as.numeric(sapply(strsplit(nominal$variant_id, "_"), `[`, 2))
@@ -62,7 +45,7 @@ nominal$celltype <- "All-PBMC"
 
 ##cm cd4 t cells- NFKB1
 celltype <- "CM_CD4_T_cells"
-EQTL_input=paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsort_allSNP/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/")
+EQTL_input=paste0("/path/eQTLresults/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/")
 nominal2 <- fread(paste0("grep ",gene_id," ",EQTL_input,"cis_nominal1.cis_qtl_pairs.",gene_chr,".tsv"))
 colnames(nominal2) <- c("phenotype_id","variant_id","start_distance","af","ma_samples","ma_count","pval_nominal","slope","slope_se")
 nominal2$POS <- as.numeric(sapply(strsplit(nominal2$variant_id, "_"), `[`, 2))
@@ -79,7 +62,7 @@ coloc_use <- coloc[coloc$gene_symbol == "MANBA",]
 coloc_use
 gene_id =coloc_use$gene_id[1]
 ##allcells - MANBA
-nominal <- read.csv("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsoft_allSNP_allcells/2_indep_coloc/All/nominal_p/ENSG00000109323_regress_chr4_102759827_chr4_102713063.csv",header=T,row.names=1)
+nominal <- read.csv("/path/eQTLresults/2_indep_coloc/All/nominal_p/ENSG00000109323_regress_chr4_102759827_chr4_102713063.csv",header=T,row.names=1)
 
 nominal$POS <- as.numeric(sapply(strsplit(nominal$variant_id, "_"), `[`, 2))
 nominal$chr_pos <- sapply(strsplit(nominal$variant_id, "_"), function(x) paste(x[1], x[2], sep = "_"))
@@ -90,7 +73,7 @@ nominal$celltype <- "All-PBMC"
 
 ##cm cd4 t cells- MANBA
 celltype <- "CM_CD4_T_cells"
-nominal2 <- read.csv("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsort_allSNP/2_indep_coloc/CM_CD4_T_cells/nominal_p/ENSG00000109323_regress_chr4_102735220.csv",header=T,row.names=1)
+nominal2 <- read.csv("/path/eQTLresults/2_indep_coloc/CM_CD4_T_cells/nominal_p/ENSG00000109323_regress_chr4_102735220.csv",header=T,row.names=1)
 nominal2$POS <- as.numeric(sapply(strsplit(nominal2$variant_id, "_"), `[`, 2))
 nominal2$chr_pos <- sapply(strsplit(nominal2$variant_id, "_"), function(x) paste(x[1], x[2], sep = "_"))
 nominal2$coloclead <- "NotColocLead"
@@ -103,7 +86,7 @@ p1 <- ggplot(GWAS_input_plot[(GWAS_input_plot$variant_id %in% overlapping_varian
 p2 <- gg_genetracks(locus(xrange=c(pos_start,pos_end), seqname=paste0("chr",gene_chr),ens_db = "EnsDb.Hsapiens.v86"), filter_gene_biotype = 'protein_coding', gene_col = "#90A4AE",exon_col = "#90A4AE",exon_border = "#90A4AE")
 
 ggarrange(p1,p3,p4,p2,ncol=1,common.legend=T)
-ggsave("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/23_locus_breaker_coloc/outputs/0_plots/forpaper/NFKB1_MANBA.pdf",width=6,height=9)
+ggsave("/path/coloc/outputs/0_plots/forpaper/NFKB1_MANBA.pdf",width=6,height=9)
 
 
 #### FHL3 and C1orf122 in TEMRA and classical monocytes####
@@ -116,10 +99,8 @@ pos_end =coloc_use$locusEnd[coloc_use$gwas_hit == gwas_hit_use][1]
 
 gene_symbol1="FHL3"
 gene_symbol2="C1orf122"
-#gene_symbol3="INPP5B"
 gene1=coloc_use$gene_id[coloc_use$gene_symbol==gene_symbol1][1]
 gene2=coloc_use$gene_id[coloc_use$gene_symbol==gene_symbol2][1]
-#gene3=coloc_use$gene_id[coloc_use$gene_symbol==gene_symbol3][1]
 gene_chr <- gsub("chr", "",coloc_use$lead_snp_chr[1])
 
 GWAS_input_plot <- GWAS_INPUT[GWAS_INPUT$chr == GWAShit_chr,]
@@ -130,11 +111,7 @@ GWAS_input_plot <- GWAS_input_plot[GWAS_input_plot$pos > pos_start,]
 #### start with clssical monocytes
 plot <- list()
 for(celltype in c("TEMRA","Classical_Monocytes")){
-  if(celltype == "All"){
-    EQTL_input <- "/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsoft_allSNP_allcells/results/TensorQTL_eQTLS/dMean__All_all/OPTIM_pcs/base_output/base/"
-  }else{
-    EQTL_input=paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsort_allSNP/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/")
-  }
+  EQTL_input=paste0("/path/eQTLresults/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/")
   
   ## gene1
   nominal <- fread(paste0("grep ",gene1," ",EQTL_input,"cis_nominal1.cis_qtl_pairs.",gene_chr,".tsv"))
@@ -155,26 +132,9 @@ for(celltype in c("TEMRA","Classical_Monocytes")){
   nominal2$gene <- gene_symbol2
   nominal2$coloclead <- "NotColocLead"
   nominal2$coloclead[nominal2$chr_pos == coloc_use[coloc_use$cell_type == celltype & coloc_use$gene_id == gene2,]$lead_H4_variant] <- "ColocLead"
-  
-  
-  
-  # ## gene3
-  # nominal3 <- fread(paste0("grep ",gene3," ",EQTL_input,"cis_nominal1.cis_qtl_pairs.",gene_chr,".tsv"))
-  # colnames(nominal3) <- c("phenotype_id","variant_id","start_distance","af","ma_samples","ma_count","pval_nominal","slope","slope_se")
-  # nominal3$POS <- as.numeric(sapply(strsplit(nominal3$variant_id, "_"), `[`, 2))
-  # nominal3$chr_pos <- sapply(strsplit(nominal3$variant_id, "_"), function(x) paste(x[1], x[2], sep = "_"))
-  # nominal3$gene <- gene_symbol3
-  # nominal3$coloclead <- "NotColocLead"
-  # nominal3$coloclead[nominal3$chr_pos == coloc_use[coloc_use$cell_type == celltype & coloc_use$gene_id == gene3,]$lead_H4_variant] <- "ColocLead"
-  
-  #pvalthres <- read.csv("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsoft_allSNP_allcells/1_csvfiles/nominal_pval_thres.csv")
-  #pvalthres1 <- pvalthres$nominal_pvalue_threshold[paste0(pvalthres$celltype,pvalthres$phenotype_id) == paste0(celltype,gene1)]
-  #pvalthres2 <- pvalthres$nominal_pvalue_threshold[paste0(pvalthres$celltype,pvalthres$phenotype_id) == paste0(celltype,gene2)]
-  #ifelse(length(pvalthres1)==0,pvalthres<- pvalthres2,pvalthres<- pvalthres1)
-  
+    
   ## bind both genes
   nominal <- rbind(nominal,nominal2)
-  #nominal <- rbind(nominal,nominal2,nominal3)
   plot <- list.append(plot,ggplot(nominal[(nominal$chr_pos %in%overlapping_variants),], aes(x = POS, y = -log10(pval_nominal),color=gene,shape=coloclead)) +geom_point(size = 1.5, alpha = 0.7)+scale_color_manual(values=c("#8E5BD9","#1F7A5A")) +scale_x_continuous(labels = scales::comma, limits=c(pos_start,pos_end))+ggtitle(paste0(celltype))+scale_shape_manual(values=c(17,16))+theme_classic()+scale_y_continuous(labels = function(x) formatC(x, width = 10)))
 
 }
@@ -184,7 +144,7 @@ p1 <- ggplot(GWAS_input_plot[(GWAS_input_plot$variant_id %in% overlapping_varian
 p2 <- gg_genetracks(locus(xrange=c(pos_start,pos_end), seqname=paste0("chr",gene_chr),ens_db = "EnsDb.Hsapiens.v86"), filter_gene_biotype = 'protein_coding', gene_col = "#90A4AE",exon_col = "#90A4AE",exon_border = "#90A4AE")+scale_y_continuous(labels = function(x) formatC(x, width = 10))
 
 ggarrange(p1,plot[[1]],plot[[2]],p2, ncol=1,nrow=4,common.legend=T)
-ggsave("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/23_locus_breaker_coloc/outputs/0_plots/forpaper/C1orf122_FHL3.pdf",width=5,height=8)
+ggsave("/path/coloc/outputs/0_plots/forpaper/C1orf122_FHL3.pdf",width=5,height=8)
 
 ####plot traf1 - color by celltype
 ####NFKB1 in all vs cmcd4t####
@@ -200,7 +160,7 @@ GWAS_input_plot <- GWAS_input_plot[GWAS_input_plot$pos < pos_end,]
 GWAS_input_plot <- GWAS_input_plot[GWAS_input_plot$pos > pos_start,]
 
 ##allcells - TRAF1
-EQTL_input <- "/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsoft_allSNP_allcells/results/TensorQTL_eQTLS/dMean__All_all/OPTIM_pcs/base_output/base/"
+EQTL_input <- "/path/eQTLresults/results/TensorQTL_eQTLS/dMean__All_all/OPTIM_pcs/base_output/base/"
 nominal <- fread(paste0("grep ",gene_id," ",EQTL_input,"cis_nominal1.cis_qtl_pairs.",gene_chr,".tsv"))
 colnames(nominal) <- c("phenotype_id","variant_id","start_distance","af","ma_samples","ma_count","pval_nominal","slope","slope_se")
 nominal$POS <- as.numeric(sapply(strsplit(nominal$variant_id, "_"), `[`, 2))
@@ -211,7 +171,7 @@ nominal$celltype <- "All-PBMC"
 
 ##cm cd4 t cells- TRAF1
 celltype <- "CM_CD4_T_cells"
-EQTL_input=paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsort_allSNP/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/")
+EQTL_input=paste0("/path/eQTLresults/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/")
 nominal2 <- fread(paste0("grep ",gene_id," ",EQTL_input,"cis_nominal1.cis_qtl_pairs.",gene_chr,".tsv"))
 colnames(nominal2) <- c("phenotype_id","variant_id","start_distance","af","ma_samples","ma_count","pval_nominal","slope","slope_se")
 nominal2$POS <- as.numeric(sapply(strsplit(nominal2$variant_id, "_"), `[`, 2))
@@ -222,7 +182,7 @@ nominal2$celltype <- celltype
 
 ##memoryB cells- TRAF1
 celltype <- "Memory_B_cells"
-EQTL_input=paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsort_allSNP/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/")
+EQTL_input=paste0("/path/eQTLresults/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/")
 nominal3 <- fread(paste0("grep ",gene_id," ",EQTL_input,"cis_nominal1.cis_qtl_pairs.",gene_chr,".tsv"))
 colnames(nominal3) <- c("phenotype_id","variant_id","start_distance","af","ma_samples","ma_count","pval_nominal","slope","slope_se")
 nominal3$POS <- as.numeric(sapply(strsplit(nominal3$variant_id, "_"), `[`, 2))
@@ -235,7 +195,7 @@ p3 <- ggplot(nominal[(nominal$chr_pos %in%overlapping_variants),], aes(x = POS, 
 p1 <- ggplot(GWAS_input_plot[(GWAS_input_plot$variant_id %in% overlapping_variants),], aes(x = pos, y = -log10(p_value))) + geom_point(size = 1.3, alpha = 0.7,color="grey50") +scale_x_continuous(labels = scales::comma, limits=c(pos_start,pos_end)) + geom_hline(yintercept=5, linetype="dashed")+theme_classic()+ggtitle("GWAS")+scale_y_continuous(labels = function(x) formatC(x, width = 10))
 p2 <- gg_genetracks(locus(xrange=c(pos_start,pos_end), seqname=paste0("chr",gene_chr),ens_db = "EnsDb.Hsapiens.v86"), filter_gene_biotype = 'protein_coding', gene_col = "#90A4AE",exon_col = "#90A4AE",exon_border = "#90A4AE",highlight="TRAF1",highlight_col="#FBB040")
 ggarrange(p1,p3,p2,ncol=1,common.legend=T)
-ggsave("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/23_locus_breaker_coloc/outputs/0_plots/forpaper/TRAF1_combined.pdf",width=6,height=7)
+ggsave("/path/coloc/outputs/0_plots/forpaper/TRAF1_combined.pdf",width=6,height=7)
 
 #### plot TRAF1 in CM CD4 T, memory B - color LD
 
@@ -243,7 +203,7 @@ coloc_use <- coloc[coloc$gene_symbol == "TRAF1",]
 coloc_use
 
 ## FOR GWAS
-GWAS_input= "/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/14_colocalization/inputs/gwas/"
+GWAS_input= "/path/coloc/inputs/gwas/"
 
 chr = "chr9"
 GWAShit = 120927961
@@ -276,16 +236,16 @@ GWAS_input_plot$color <- "nothit"
 GWAS_input_plot$color[GWAS_input_plot$pos == GWAShit] <- "GWAShit"
 
 ##get LD 
-system2("bash", args = c("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Scripts/20_ancestry_coloc/6.5_LDforall.sh",paste0(colocvariant,"_",REF,"_",ALT),gene_chr, pos_start,pos_end))
-ld <- read.table(paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/20_ancestry_coloc/0_calcLD/all/",colocvariant,"_",REF,"_",ALT,".vcor"))
+system2("bash", args = c("/path/6.5_LDforall.sh",paste0(colocvariant,"_",REF,"_",ALT),gene_chr, pos_start,pos_end))
+ld <- read.table(paste0("/path/coloc/0_calcLD/all/",colocvariant,"_",REF,"_",ALT,".vcor"))
 
 ## FOR EQTL
 
 getplot <- function(celltype){
   if(celltype == "All"){
-    EQTL_input=paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsoft_allSNP_allcells/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/")
+    EQTL_input=paste0("/path/eQTLresults/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/")
   }else{
-    EQTL_input=paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsort_allSNP/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/")
+    EQTL_input=paste0("/path/eQTLresults/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/")
   }
   nominal <- fread(paste0("grep ",gene," ",EQTL_input,"cis_nominal1.cis_qtl_pairs.",gene_chr,".tsv"))
   colnames(nominal) <- c("phenotype_id","variant_id","start_distance","af","ma_samples","ma_count","pval_nominal","slope","slope_se")
@@ -313,11 +273,11 @@ getplot <- function(celltype){
   ####get nominal p-val thres
   #####double check that the gene plotted has a sig eQTL, so the pvalthres is reliable
   if(celltype == "All"){
-    pvalthres <- read.table("//lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsoft_allSNP_allcells/results/TensorQTL_eQTLS/dMean__All_all/OPTIM_pcs/base_output/base/Cis_eqtls_qval.tsv",header=T,fill=T)
+    pvalthres <- read.table("/path/eQTLresults/results/TensorQTL_eQTLS/dMean__All_all/OPTIM_pcs/base_output/base/Cis_eqtls_qval.tsv",header=T,fill=T)
     pvalthres <- pvalthres[pvalthres$qval < 0.05,]
     pvalthres <- pvalthres$pval_nominal_threshold[pvalthres$phenotype_id == gene]
   }else{
-    pvalthres <- read.csv("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsort_allSNP/1_csvfiles/conditionaleQTL.csv")
+    pvalthres <- read.csv("/path/eQTLresults/1_csvfiles/conditionaleQTL.csv")
     pvalthres <- pvalthres$nominal_pvalue_threshold[paste0(pvalthres$celltype,pvalthres$phenotype_id) == paste0(celltype,gene)]
     pvalthres <- pvalthres[1]
   }
@@ -341,4 +301,4 @@ p2 <- gg_genetracks(locus(xrange=c(pos_start,pos_end), seqname=chr,ens_db = "Ens
 
 
 ggarrange(CM_CD4_T_cells[[1]],CM_CD4_T_cells[[2]],Memory_B_cells[[2]],All[[2]],p2,ncol=1,common.legend = T)
-ggsave("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/23_locus_breaker_coloc/outputs/0_plots/forpaper/TRAF1.pdf",width=5,height=10)
+ggsave("/path/coloc/outputs/0_plots/forpaper/TRAF1.pdf",width=5,height=10)

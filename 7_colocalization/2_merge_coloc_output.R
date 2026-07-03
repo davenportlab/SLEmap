@@ -1,8 +1,6 @@
 library(dplyr)
-#library(biomaRt)
 library(data.table)
 
-#GWAS_ID="GCST003156"
 GWAS_ID="GCST90270940"
 
 ####make output directories
@@ -14,7 +12,7 @@ if (!dir.exists(paste0(DIR_MAIN,"/1_csvfiles"))) {
 }
 
 ###merge coloc
-DIR_MAIN="/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/23_locus_breaker_coloc/outputs"
+DIR_MAIN="/path/coloc/outputs"
 files <- list.files(path=paste0(DIR_MAIN, 
                                 "/",
                                 GWAS_ID, "/all_checksigeQTL_checkallele/"),
@@ -32,28 +30,14 @@ for(fn in files){
 dim(all_out)
 
 ### add gene name
-genenames <- read.csv("/lustre/scratch127/open-targets/Projects/OTAR2064/working/slemap/singlecell/ensemblID_to_genesymbol.csv")
+genenames <- read.csv("/path/ensemblID_to_genesymbol.csv")
 all_out$gene_symbol <- genenames$gene_symbols[match(all_out$gene_id,genenames$X)]
-
 all_out$PP.H4.abf <- as.numeric(all_out$PP.H4.abf)
 
 ### add coloc testing window from locus breaker
-locusbreaker <- read.csv("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/23_locus_breaker_coloc/gwashit_locusbreaker_forinput.csv")
+locusbreaker <- read.csv("/path/coloc/gwashit_locusbreaker_forinput.csv")
 all_out$locusStart <- locusbreaker$locusStart[match(all_out$gwas_hit,locusbreaker$variant_id)]
 all_out$locusEnd <- locusbreaker$locusEnd[match(all_out$gwas_hit,locusbreaker$variant_id)]
-
-# rank the conditional eQTLs again by p-value
-conditional <- read.csv("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsort_allSNP/1_csvfiles/conditionaleQTL_simple.csv")
-conditional$pos <- sub("_[ACGT]+_[ACGT]+$", "", conditional$variant_id)
-
-conditional_all <- read.table("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsoft_allSNP_allcells/results/TensorQTL_eQTLS/dMean__All_all/OPTIM_pcs/base_output/base/Cis_eqtls_independent.tsv",header=T)
-conditional_all$celltype <- "All"
-conditional_all <- conditional_all %>% group_by(phenotype_id) %>% arrange(pval_nominal, .by_group=T) %>% mutate(rank_new=row_number())%>% ungroup() 
-conditional_all$pos <- sub("_[ACGT]+_[ACGT]+$", "", conditional_all$variant_id)
-
-conditional <- rbind(conditional,conditional_all)
-
-all_out$rank_new <- conditional$rank_new[match(paste0(all_out$cell_type,all_out$gene_id,all_out$lead_snp),paste0(conditional$celltype,conditional$phenotype_id,conditional$pos))]
 
 write.table(all_out,
             paste0(DIR_MAIN, "/", GWAS_ID, "/all_checksigeQTL_checkallele/coloc_output_with_gene_name.txt"),
@@ -61,19 +45,11 @@ write.table(all_out,
 
 sig_coloc <- dplyr::filter(all_out, PP.H4.abf >=0.8)
 
-dim(sig_coloc) #160 with bulklike
-length(unique(sig_coloc$gene_id)) #69
-
-dim(sig_coloc[sig_coloc$cell_type != "All",]) #123
-length(unique(sig_coloc[sig_coloc$cell_type != "All",]$gene_id)) #57
-
 dplyr::filter(all_out, PP.H4.abf >=0.8) %>% 
   dplyr::group_by(cell_type) %>% tally()
 
 write.csv(sig_coloc,
             paste0(DIR_MAIN, "/", GWAS_ID, "/sig_checksigeQTL_checkallele/coloc_output_with_gene_name_sig.csv"), quote=F, row.names = F)
-
-sig_coloc <- read.csv(paste0(DIR_MAIN, "/", GWAS_ID, "/sig_checksigeQTL_checkallele/coloc_output_with_gene_name_sig.csv"),header=T)
 
 ### identify if coloc genes were tested in other cell types, if there is a significant eQTL for the cell type
 genes <- unique(sig_coloc$gene_id)
@@ -81,12 +57,12 @@ cell_types <- c("CD56Bright_NK_cells","CD56Dim_NK_cells","Classical_Monocytes","
 df <- expand.grid(gene = genes, celltype = cell_types, stringsAsFactors = FALSE)
 
 df$genestested <- "Nottested"
-genestested <- read.csv("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsort_allSNP/1_csvfiles/genestested_wbulklike.csv")
+genestested <- read.csv("/path/eQTLresults/1_csvfiles/genestested_wbulklike.csv")
 genestested$use <- paste0(genestested$phenotype_id,genestested$celltype)
 df$genestested[paste0(df$gene,df$celltype) %in% genestested$use] <- "tested"
 
 df$genessig <- "Notsig"
-genessig <- read.csv("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsort_allSNP/1_csvfiles/genessig_wbulklike.csv")
+genessig <- read.csv("/path/eQTLresults/1_csvfiles/genessig_wbulklike.csv")
 genessig$use <- paste0(genessig$phenotype_id,genessig$celltype)
 df$genessig[paste0(df$gene,df$celltype) %in% genessig$use] <- "Sig"
 
@@ -150,59 +126,7 @@ ggplot(df[(df$group != "Not tested for eQTL"),],aes(x=reorder(gene_symbol,Ord2),
   scale_shape_manual(values=c(4, 0,2,19))+theme(legend.position = "top")+
   ggtitle(paste0("SNPs for colocalized genes"))
 
-
-ggsave(paste0(DIR_MAIN,"/0_plots/eQTLtested_shapeplot_",GWAS_ID,"_wbulklike_checksigeQTL.pdf"),width=8,height=14)
-
-
-###plot without 17q.21.31 region
-ggplot(df[(df$group != "Not tested for eQTL") & (!df$gene_symbol %in% c("KANSL1","KANSL1-AS1","ARL17B")),],aes(x=reorder(gene_symbol,Ord2), y = celltype_forplots, shape=group,color=group))+
-  geom_point(size=3)+
-  theme_classic() + 
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+ 
-  facet_grid(.~cellgroup_forplots, scales = "free", space = "free")+
-  theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
-  scale_size(range = c(2, 6))+
-  xlab("Gene") +
-  ylab("Cell type")+ 
-  coord_flip()+
-  scale_shape_manual(values=c(4, 0,2,19))+theme(legend.position = "top")+
-  ggtitle(paste0("SNPs for colocalized genes"))
-
-
-ggsave(paste0(DIR_MAIN,"/0_plots/eQTLtested_shapeplot_",GWAS_ID,"_wbulklike_checksigeQTL_wo17q21.pdf"),width=8,height=13)
-
-###plot only sc 
-
-onlyinsc <- df[df$group == "Colocalized",]
-onlyinsc <- onlyinsc[onlyinsc$celltype != "All",]$gene
-
-ggplot(df[(df$group != "Not tested for eQTL") & (df$celltype != "All") & (df$gene %in% onlyinsc),],aes(x=reorder(gene_symbol,Ord2), y = celltype_forplots, shape=group,color=group))+
-  geom_point(size=2.5)+
-  theme_classic() + 
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+ 
-  facet_grid(.~cellgroup_forplots, scales = "free", space = "free")+
-  theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
-  scale_size(range = c(2, 6))+
-  xlab("Gene") +
-  ylab("Cell type")+ 
-  coord_flip()+
-  scale_shape_manual(values=c(4, 0,2,19))+theme(legend.position = "top")+
-  ggtitle(paste0("SNPs for colocalized genes"))
-
-ggsave(paste0(DIR_MAIN,"/0_plots/eQTLtested_shapeplot_",GWAS_ID,"_checksigeQTL.pdf"),width=6,height=12)
+ggsave(paste0(DIR_MAIN,"/0_plots/eQTLtested_shapeplot_",GWAS_ID,".pdf"),width=8,height=14)
 
 write.csv(df,paste0(DIR_MAIN,"/1_csvfiles/coloc_genegroup_",GWAS_ID,"_checksigeQTL.csv"))
 
-####look at distrib of window distnace and num snps
-DIR_MAIN="/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/23_locus_breaker_coloc/outputs"
-coloc <- read.csv(paste0(DIR_MAIN,"/1_csvfiles/coloc_sigresults_",GWAS_ID,"_checksigeQTL.csv"))
-ggplot(coloc, aes(x=nsnps)) + 
-  geom_histogram(color="black", fill="white",bins=50)+xlim(0,600)
-
-ggplot(coloc, aes(x=locusEnd-locusStart, y=nsnps)) + geom_point()+ scale_x_continuous(labels = label_comma())
-coloc$windowsize <- coloc$locusEnd - coloc$locusStart
-
-###compare genes with previous result
-coloc_old <- read.csv("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/14_colocalization/1_csvfiles/coloc_sigresults_GCST90270940_checksigeQTL.csv")
-coloc$gene_symbol[!coloc$gene_symbol %in% coloc_old$gene_symbol]
-coloc_old$gene_symbol[!coloc_old$gene_symbol %in% coloc$gene_symbol]

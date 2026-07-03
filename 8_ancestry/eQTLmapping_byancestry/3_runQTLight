@@ -1,0 +1,7 @@
+steps to run QTLight pipeline
+
+1. go to working directory
+2. edit input.nf file
+3. module load HGI/pipelines/QTLight/1.60
+4. export QUEUE='normal'
+5. qtlight -c input.nf --TensorQTL.run=true --LIMIX.run=false --SAIGE.run=false --annotation_file=/nfs/srpipe_references/downloaded_from_10X/refdata-gex-GRCh38-2020-A/genes/genes.gtf
