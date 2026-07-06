@@ -1,3 +1,5 @@
+## plot genotype PCs by ancestry to decide number of PCs to include in eQTL mapping - using 2PCs for all ancestries
+
 library(data.table)
 library(ggplot2)
 library(ggpubr)
@@ -5,9 +7,9 @@ library(rlist)
 
 plotlist <- list()
 for(i in c("AFR","SAS","EUR")){
-  pca <- fread(paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/20_ancestry_coloc/",i,"/FindGenotypePCs/pca.eigenvec"))
+  pca <- fread(paste0("/path/ancestry_coloc/",i,"/FindGenotypePCs/pca.eigenvec"))
   colnames(pca)[1:2] <- c("FID", "IID")
-  eigenval <- scan(paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/20_ancestry_coloc/",i,"/FindGenotypePCs/pca.eigenval"))
+  eigenval <- scan(paste0("/path/ancestry_coloc/",i,"/FindGenotypePCs/pca.eigenval"))
   var <- round(eigenval / sum(eigenval) * 100, 2)
   
   p1 <- ggplot(pca, aes(PC1, PC2)) +
@@ -40,7 +42,7 @@ for(i in c("AFR","SAS","EUR")){
 }
 
 plotlist
-pdf(file = "/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/20_ancestry_coloc/genotypePCs_maf005.pdf",width=10,height=4)
+pdf(file = "/path/ancestry_coloc/genotypePCs_maf005.pdf",width=10,height=4)
 for(i in 1:length(plotlist)){
   print(plotlist[[i]])
 }
