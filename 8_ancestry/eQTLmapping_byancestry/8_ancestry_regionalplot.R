@@ -10,20 +10,19 @@ library(scales)
 ### grey dots in plot means that the LD could not be calculated because lead H4 snp had too low maf
 
 ## FOR GWAS
-GWAS_input= "/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/14_colocalization/inputs/gwas/"
-#GWAS_ID="GCST003156"
+GWAS_input= "/path/coloc/inputs/gwas/"
 GWAS_ID="GCST90270940"
 
 ##get maf info
-maf <- fread("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/wl2/wgs/01_5.variants_for_eQTLs/2.eQTL_hwe_0.000001_maf_0.05_miss_0.95/281_samples.allChrs.hwe_0.000001_maf_0.05_miss_0.95_updateID.afreq")
-AFR_maf <- fread("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/20_ancestry_coloc/AFR/inputs/281_samples.allChrs.hwe_0.000001_maf_0.05_miss_0.95_updateID_AFR_n102_ancestrymaf_0.05.afreq")
-EUR_maf <- fread("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/20_ancestry_coloc/EUR/inputs/281_samples.allChrs.hwe_0.000001_maf_0.05_miss_0.95_updateID_EUR_n81_ancestrymaf_0.05.afreq")
-SAS_maf <- fread("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/20_ancestry_coloc/SAS/inputs/281_samples.allChrs.hwe_0.000001_maf_0.05_miss_0.95_updateID_SAS_n62_ancestrymaf_0.05.afreq")
+maf <- fread("/path/281_samples.allChrs.hwe_0.000001_maf_0.05_miss_0.95_updateID.afreq")
+AFR_maf <- fread("/path/ancestry_coloc/AFR/inputs/281_samples.allChrs.hwe_0.000001_maf_0.05_miss_0.95_updateID_AFR_n102_ancestrymaf_0.05.afreq")
+EUR_maf <- fread("/path/ancestry_coloc/EUR/inputs/281_samples.allChrs.hwe_0.000001_maf_0.05_miss_0.95_updateID_EUR_n81_ancestrymaf_0.05.afreq")
+SAS_maf <- fread("/path/ancestry_coloc/SAS/inputs/281_samples.allChrs.hwe_0.000001_maf_0.05_miss_0.95_updateID_SAS_n62_ancestrymaf_0.05.afreq")
 
 ##GET coloc results
-DIR_MAIN="/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/23_locus_breaker_coloc/outputs"
+DIR_MAIN="/path/coloc/outputs"
 
-coloc <- read.csv(paste0(DIR_MAIN,"/1_csvfiles/coloc_sigresults_",GWAS_ID,"_checksigeQTL.csv"))
+coloc <- read.csv(paste0(DIR_MAIN,"/1_csvfiles/coloc_sigresults.csv"))
 
 GWAS_INPUT <- fread (paste0(GWAS_input,GWAS_ID,"/",GWAS_ID,"_for_eqtl.txt.gz")) %>%
   as.data.frame() %>%
@@ -33,8 +32,8 @@ GWAS_INPUT <- GWAS_INPUT[!((GWAS_INPUT$chr == "chr6") & (GWAS_INPUT$pos > 250000
 
 GWAS_INPUT$pos <- as.numeric(GWAS_INPUT$pos)
 GWAS_INPUT$p_value <- as.numeric(GWAS_INPUT$p_value)
-locusbreaker <- read.csv("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/23_locus_breaker_coloc/gwashit_locusbreaker_forinput.csv")
-coloc_group <- read.csv(paste0(DIR_MAIN,"/1_csvfiles/coloc_genegroup_",GWAS_ID,"_checksigeQTL.csv"),nrow=F)
+locusbreaker <- read.csv("/path/coloc/gwashit_locusbreaker_forinput.csv")
+coloc_group <- read.csv(paste0(DIR_MAIN,"/1_csvfiles/coloc_genegroup.csv"),nrow=F)
 
 ##make output dir
 if (!dir.exists(paste0(DIR_MAIN,"/0_plots/ancestry_LD_onlyoverlap"))) {
@@ -76,21 +75,21 @@ for(i in 1:nrow(coloc)){
   GWAS_input_plot <- GWAS_input_plot %>% arrange(desc(color))
   
   ##get LD 
-  system2("bash", args = c("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Scripts/20_ancestry_coloc/6_LDbyancestry.sh",paste0(colocvariant,"_",REF,"_",ALT),gene_chr, pos_start,pos_end))
-  all_ld <- read.table(paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/20_ancestry_coloc/0_calcLD/all/",colocvariant,"_",REF,"_",ALT,".vcor"))
+  system2("bash", args = c("/path/ancestry_coloc/5_LDbyancestry.sh",paste0(colocvariant,"_",REF,"_",ALT),gene_chr, pos_start,pos_end))
+  all_ld <- read.table(paste0("/path/ancestry_coloc/0_calcLD/all/",colocvariant,"_",REF,"_",ALT,".vcor"))
 
   ## get eQTL
   if(celltype == "All"){
-    EQTL_input=paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsoft_allSNP_allcells/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/")
+    EQTL_input=paste0("/path/eQTLresults/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/")
   }else{
-    EQTL_input=paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsort_allSNP/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/")
+    EQTL_input=paste0("/path/eQTLresults/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/")
   }
   
   independent=read.table(paste0(EQTL_input,"Cis_eqtls_independent.tsv"),header=T)
   independent_n <- nrow(independent[independent$phenotype_id == gene,])
   
   ##get nominal p-val threshold for all eQTL
-  pvalthres <- read.csv("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsort_allSNP/1_csvfiles/conditionaleQTL.csv")
+  pvalthres <- read.csv("/path/eQTLresults/1_csvfiles/conditionaleQTL.csv")
   pvalthres <- pvalthres$nominal_pvalue_threshold[paste0(pvalthres$celltype,pvalthres$phenotype_id) == paste0(celltype,gene)]
   pvalthres <- pvalthres[1]
   
@@ -98,12 +97,12 @@ for(i in 1:nrow(coloc)){
   plot_overlap <- list()
   if(independent_n > 1){
     if(celltype == "All"){
-      indeplist <- list.files(paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsoft_allSNP_allcells/2_indep_coloc/",celltype,"/nominal_p/"),gene,full.names = TRUE)
-      pvalthres <- read.table("//lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsoft_allSNP_allcells/results/TensorQTL_eQTLS/dMean__All_all/OPTIM_pcs/base_output/base/Cis_eqtls_qval.tsv",header=T,fill=T)
+      indeplist <- list.files(paste0("/path/eQTLresults/2_indep_coloc/",celltype,"/nominal_p/"),gene,full.names = TRUE)
+      pvalthres <- read.table("//path/eQTLresults/results/TensorQTL_eQTLS/dMean__All_all/OPTIM_pcs/base_output/base/Cis_eqtls_qval.tsv",header=T,fill=T)
       pvalthres <- pvalthres$pval_nominal_threshold[pvalthres$phenotype_id == gene]
     }else{
-      indeplist <- list.files(paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsort_allSNP/2_indep_coloc/",celltype,"/nominal_p/"),gene,full.names = TRUE)
-      pvalthres <- read.csv("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsort_allSNP/1_csvfiles/conditionaleQTL.csv")
+      indeplist <- list.files(paste0("/path/eQTLresults/2_indep_coloc/",celltype,"/nominal_p/"),gene,full.names = TRUE)
+      pvalthres <- read.csv("/path/eQTLresults/1_csvfiles/conditionaleQTL.csv")
       pvalthres <- pvalthres$nominal_pvalue_threshold[paste0(pvalthres$celltype,pvalthres$phenotype_id) == paste0(celltype,gene)]
       pvalthres <- pvalthres[1]
     }
@@ -173,10 +172,10 @@ for(i in 1:nrow(coloc)){
     
     ##get nominal p-val threshold for all eQTL
     if(celltype == "All"){
-      pvalthres <- read.table("//lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsoft_allSNP_allcells/results/TensorQTL_eQTLS/dMean__All_all/OPTIM_pcs/base_output/base/Cis_eqtls_qval.tsv",header=T,fill=T)
+      pvalthres <- read.table("//path/eQTLresults/results/TensorQTL_eQTLS/dMean__All_all/OPTIM_pcs/base_output/base/Cis_eqtls_qval.tsv",header=T,fill=T)
       pvalthres <- pvalthres$pval_nominal_threshold[pvalthres$phenotype_id == gene]
     }else{
-      pvalthres <- read.csv("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsort_allSNP/1_csvfiles/conditionaleQTL.csv")
+      pvalthres <- read.csv("/path/eQTLresults/1_csvfiles/conditionaleQTL.csv")
       pvalthres <- pvalthres$nominal_pvalue_threshold[paste0(pvalthres$celltype,pvalthres$phenotype_id) == paste0(celltype,gene)]
       pvalthres <- pvalthres[1]
     }
@@ -193,7 +192,7 @@ for(i in 1:nrow(coloc)){
   
   ###ancestry specific
   ###AFR
-  nominal<- fread(paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/20_ancestry_coloc/AFR/ManualPCs/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/cis_nominal1.cis_qtl_pairs.",gene_chr,".tsv"))
+  nominal<- fread(paste0("/path/ancestry_coloc/AFR/ManualPCs/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/cis_nominal1.cis_qtl_pairs.",gene_chr,".tsv"))
   
   colnames(nominal) <- c("phenotype_id","variant_id","start_distance","af","ma_samples","ma_count","pval_nominal","slope","slope_se")
   nominal <- nominal[nominal$phenotype_id == gene,]
@@ -207,7 +206,7 @@ for(i in 1:nrow(coloc)){
   nominal$coloc_leadsnp[nominal$chr_pos == colocvariant] <- "lead_colocsnp"
   nominal <- nominal %>% arrange(desc(coloc_leadsnp))
   
-  LDfile <- paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/20_ancestry_coloc/0_calcLD/AFR/",colocvariant,"_",REF,"_",ALT,".vcor")
+  LDfile <- paste0("/path/ancestry_coloc/0_calcLD/AFR/",colocvariant,"_",REF,"_",ALT,".vcor")
   if(file.exists(LDfile)){
     AFR_ld <- read.table(LDfile)
     nominal$LD <- AFR_ld$V7[match(nominal$variant_id,AFR_ld$V6)]
@@ -218,7 +217,7 @@ for(i in 1:nrow(coloc)){
     nominal$LD <- NA
   }
 
-  pvalthres <- fread(paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/20_ancestry_coloc/AFR/ManualPCs/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/Cis_eqtls_qval.tsv"))
+  pvalthres <- fread(paste0("/path/ancestry_coloc/AFR/ManualPCs/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/Cis_eqtls_qval.tsv"))
   if(pvalthres$qval[pvalthres$phenotype_id == gene] < 0.05){
     pvalthres <- pvalthres$pval_nominal_threshold[pvalthres$phenotype_id == gene]
   }else{
@@ -233,7 +232,7 @@ for(i in 1:nrow(coloc)){
   
   
   ###EUR
-  nominal<- fread(paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/20_ancestry_coloc/EUR/ManualPCs/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/cis_nominal1.cis_qtl_pairs.",gene_chr,".tsv"))
+  nominal<- fread(paste0("/path/ancestry_coloc/EUR/ManualPCs/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/cis_nominal1.cis_qtl_pairs.",gene_chr,".tsv"))
   
   colnames(nominal) <- c("phenotype_id","variant_id","start_distance","af","ma_samples","ma_count","pval_nominal","slope","slope_se")
   
@@ -248,7 +247,7 @@ for(i in 1:nrow(coloc)){
   nominal$coloc_leadsnp[nominal$chr_pos == colocvariant] <- "lead_colocsnp"
   nominal <- nominal %>% arrange(desc(coloc_leadsnp))
   
-  LDfile <- paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/20_ancestry_coloc/0_calcLD/EUR/",colocvariant,"_",REF,"_",ALT,".vcor")
+  LDfile <- paste0("/path/ancestry_coloc/0_calcLD/EUR/",colocvariant,"_",REF,"_",ALT,".vcor")
   if(file.exists(LDfile)){
     EUR_ld <- read.table(LDfile)
     nominal$LD <- EUR_ld$V7[match(nominal$variant_id,EUR_ld$V6)]
@@ -259,7 +258,7 @@ for(i in 1:nrow(coloc)){
     nominal$LD <- NA
   }
   
-  pvalthres <- fread(paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/20_ancestry_coloc/EUR/ManualPCs/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/Cis_eqtls_qval.tsv"))
+  pvalthres <- fread(paste0("/path/ancestry_coloc/EUR/ManualPCs/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/Cis_eqtls_qval.tsv"))
   if(pvalthres$qval[pvalthres$phenotype_id == gene] < 0.05){
     pvalthres <- pvalthres$pval_nominal_threshold[pvalthres$phenotype_id == gene]
   }else{
@@ -273,7 +272,7 @@ for(i in 1:nrow(coloc)){
   plot_overlap <- list.append(plot_overlap,ggplot(nominal[nominal$overlap == "overlap",], aes(x = POS, y = -log10(pval_nominal),color=LD,shape=coloc_leadsnp)) +geom_point(aes(size=overlap, alpha = overlap))+scale_alpha_manual(values = c("not_overlap" = 0.2, "overlap" = 0.7))+scale_size_manual(values = c("not_overlap" = 1, "overlap" = 1.5)) +scale_x_continuous(labels = scales::comma, limits=c(pos_start,pos_end))+ggtitle(paste0("EUR: ",celltype," ",coloc_genesymbol," (lead coloc SNP ALT AF=",AF,")"))+theme_bw()+scale_color_manual(values=c("0.8–1.0"="#D33F49", "0.6–0.8"="#F79256", "0.4–0.6"="#90BE6D", "0.2–0.4"="#4E9CFF", "0–0.2"="#00117F"))+scale_shape_manual(values=c("lead_colocsnp"=17,"notlead_colocsnp"=16)) + geom_hline(yintercept=-log10(pvalthres), linetype="dashed"))
   
   ###SAS
-  nominal<- fread(paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/20_ancestry_coloc/SAS/ManualPCs/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/cis_nominal1.cis_qtl_pairs.",gene_chr,".tsv"))
+  nominal<- fread(paste0("/path/ancestry_coloc/SAS/ManualPCs/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/cis_nominal1.cis_qtl_pairs.",gene_chr,".tsv"))
   
   colnames(nominal) <- c("phenotype_id","variant_id","start_distance","af","ma_samples","ma_count","pval_nominal","slope","slope_se")
   nominal <- nominal[nominal$phenotype_id == gene,]
@@ -287,7 +286,7 @@ for(i in 1:nrow(coloc)){
   nominal$coloc_leadsnp[nominal$chr_pos == colocvariant] <- "lead_colocsnp"
   nominal <- nominal %>% arrange(desc(coloc_leadsnp))
   
-  LDfile <- paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/20_ancestry_coloc/0_calcLD/SAS/",colocvariant,"_",REF,"_",ALT,".vcor")
+  LDfile <- paste0("/path/ancestry_coloc/0_calcLD/SAS/",colocvariant,"_",REF,"_",ALT,".vcor")
   if(file.exists(LDfile)){
     SAS_ld <- read.table(LDfile)
     nominal$LD <- SAS_ld$V7[match(nominal$variant_id,SAS_ld$V6)]
@@ -298,7 +297,7 @@ for(i in 1:nrow(coloc)){
     nominal$LD <- NA
   }
   
-  pvalthres <- fread(paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/20_ancestry_coloc/SAS/ManualPCs/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/Cis_eqtls_qval.tsv"))
+  pvalthres <- fread(paste0("/path/ancestry_coloc/SAS/ManualPCs/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/Cis_eqtls_qval.tsv"))
   if(pvalthres$qval[pvalthres$phenotype_id == gene] < 0.05){
     pvalthres <- pvalthres$pval_nominal_threshold[pvalthres$phenotype_id == gene]
   }else{
@@ -319,7 +318,7 @@ for(i in 1:nrow(coloc)){
   print(do.call(ggarrange, c(plot_overlap, ncol = 1, align = "v",common.legend=T)))
   dev.off()
   
-  system2("rm",args= c(paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/20_ancestry_coloc/0_calcLD/*/",colocvariant,"*")))
+  system2("rm",args= c(paste0("/path/ancestry_coloc/0_calcLD/*/",colocvariant,"*")))
   
 }
 

@@ -43,4 +43,4 @@ ggplot(coloc_results,
   scale_color_manual(values = c("Novel" = "#5FA1ED","Known" = "#AEC4D6"))+
   ggtitle(paste0("Coloc with ", GWAS_ID))+ theme(panel.spacing = unit(-0.1, "lines"))
 
-ggsave(paste0("/path/coloc/colocsummary_dotplot_",GWAS_ID,"_PPH4_checksigeQTL_unique_bygene_novel_color.pdf"),height=14,width=9)
+ggsave(paste0("/path/coloc/colocsummary_dotplot_",GWAS_ID,"_PPH4_unique_bygene_novel_color.pdf"),height=14,width=9)

@@ -110,11 +110,10 @@ ggplot(dat,aes(x=reorder(gwashit_forplot, Ord1), y = celltype_forplots, color = 
   scale_color_gradient2(low = "blue",mid = "yellow",high = "darkgreen",midpoint = 0)+
   scale_size(range = c(3, 5))+xlab("GWAS hit") +ylab("Cell type")+ coord_flip()+ggtitle(paste0("Coloc with ",GWAS_ID," (PP.H4>0.8)(dots=lead PPH4 eQTLs>0.8)"))
 
-ggsave(paste0(DIR_MAIN,"/0_plots/colocsummary_dotplot_",GWAS_ID,"_wo_bulklike_checksigeQTL.pdf"),height=15,width=11)
-write.csv(dat,paste0(DIR_MAIN,"/1_csvfiles/coloc_sigresults_",GWAS_ID,"_checksigeQTL.csv"),row.names=F)
+ggsave(paste0(DIR_MAIN,"/0_plots/colocsummary_dotplot_",GWAS_ID,"_wo_bulklike.pdf"),height=15,width=11)
+write.csv(dat,paste0(DIR_MAIN,"/1_csvfiles/coloc_sigresults.csv"),row.names=F)
 
 ## dotplot with PPH4
-dat <- read.csv(paste0(DIR_MAIN,"/1_csvfiles/coloc_sigresults_",GWAS_ID,"_checksigeQTL.csv"))
 dat$celltype_forplots <- gsub("_", " ", dat$cell_type)
 dat$celltype_forplots <- factor(dat$celltype_forplots, levels=c("Naive CD4 T cells","CM CD4 T cells","EM CD4 T cells","Cytotoxic CD4 T cells","Regulatory CD4 T cells","Naive CD8 T cells","CM CD8 T cells","EM CD8 T cells","TEMRA","DN T cells","Naive B cells","Memory B cells","Classical Monocytes","CD56Bright NK cells","CD56Dim NK cells","All"))
 dat$cellgroup_forplots <- gsub("_", " ", dat$cellgroup)
@@ -129,4 +128,4 @@ ggplot(dat,aes(x=reorder(gwashit_forplot, Ord1), y = celltype_forplots, color = 
   facet_grid(.~cellgroup_forplots, scales = "free", space = "free")+
   theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
   scale_size(range = c(2, 6))+xlab("GWAS hit") +ylab("Cell type")+ coord_flip()+ggtitle(paste0("Coloc with ",GWAS_ID))
-ggsave(paste0(DIR_MAIN,"/0_plots/colocsummary_dotplot_",GWAS_ID,"_PPH4_checksigeQTL.pdf"),height=14,width=10)
+ggsave(paste0(DIR_MAIN,"/0_plots/colocsummary_dotplot_",GWAS_ID,"_PPH4.pdf"),height=14,width=10)

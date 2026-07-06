@@ -128,5 +128,5 @@ ggplot(df[(df$group != "Not tested for eQTL"),],aes(x=reorder(gene_symbol,Ord2),
 
 ggsave(paste0(DIR_MAIN,"/0_plots/eQTLtested_shapeplot_",GWAS_ID,".pdf"),width=8,height=14)
 
-write.csv(df,paste0(DIR_MAIN,"/1_csvfiles/coloc_genegroup_",GWAS_ID,"_checksigeQTL.csv"))
+write.csv(df,paste0(DIR_MAIN,"/1_csvfiles/coloc_genegroup.csv"))
 

@@ -10,7 +10,7 @@ otar$chr <- paste0("chr", sub("_.*", "",otar$variantId))
 otar$pos <- sub("^[^_]+_([^_]+)_.*", "\\1", otar$variantId)
 
 #get my colocs
-coloc <- read.csv(paste0(DIR_MAIN,"/1_csvfiles/coloc_sigresults_GCST90270940_checksigeQTL.csv"))
+coloc <- read.csv(paste0(DIR_MAIN,"/1_csvfiles/coloc_sigresults.csv"))
 
 #compare
 window <- 500000

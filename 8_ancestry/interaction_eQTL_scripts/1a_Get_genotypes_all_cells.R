@@ -10,7 +10,7 @@ genotypes_dir <- glue("{data_dir}/genotypes")
 dir.create(file.path(genotypes_dir))
 wgs_dir <- "WGS_data"
 
-coloc_results <- read.csv("coloc_sigresults_GCST90270940_checksigeQTL.csv")
+coloc_results <- read.csv("coloc_sigresults.csv")
 coloc_results$lead_H4_variant_REF_ALT <- paste(
   coloc_results$lead_H4_variant,
   coloc_results$lead_H4_variant_GTF_REF,

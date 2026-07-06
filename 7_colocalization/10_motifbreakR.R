@@ -12,7 +12,7 @@ dir.create(file.path(paste0(resultdir,"bedfiles")))
 dir.create(file.path(paste0(resultdir,"strong_results")))
 
 ####identify eSNVs to test 
-coloc <- read.csv(paste0("/path/coloc/","1_csvfiles/coloc_sigresults_GCST90270940_checksigeQTL.csv"),row.names=1)
+coloc <- read.csv(paste0("/path/coloc/","1_csvfiles/coloc_sigresults.csv"),row.names=1)
 
 ####running for specific cases1 - TRAF1 in CD4 T cells####
 coloc_use <- coloc[coloc$cell_type == "CM_CD4_T_cells" & coloc$gene_symbol == "TRAF1",]

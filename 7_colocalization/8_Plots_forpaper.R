@@ -8,7 +8,7 @@ library(locuszoomr)
 library(EnsDb.Hsapiens.v86)
 library(forcats)
 
-coloc <- read.csv("/path/coloc/outputs/1_csvfiles/coloc_sigresults_GCST90270940_checksigeQTL.csv")
+coloc <- read.csv("/path/coloc/outputs/1_csvfiles/coloc_sigresults.csv")
 
 #get GWAS
 GWAS_input= "/path/coloc/inputs/gwas/"

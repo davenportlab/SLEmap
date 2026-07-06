@@ -17,7 +17,7 @@ string_db <- STRINGdb$new(
 # 2. INPUT: your gene sets
 # ---------------------------
 # Replace these with your actual results per cell type
-coloc <- read.csv("/path/coloc/outputs/1_csvfiles/coloc_sigresults_GCST90270940_checksigeQTL.csv")
+coloc <- read.csv("/path/coloc/outputs/1_csvfiles/coloc_sigresults.csv")
 gene_sets <- list(
   "B" = unique(coloc$gene_id[coloc$cellgroup== "B"]),
   "Monocyte" = unique(coloc$gene_id[coloc$cellgroup == "Mono"]),

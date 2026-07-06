@@ -8,7 +8,7 @@ celltypes_to_test <- c("Classical_Monocytes", "DN_T_cells", "Memory_B_cells", "R
                        "CM_CD8_T_cells", "EM_CD8_T_cells", "Naive_CD4_T_cells", "CD56Dim_NK_cells",
                        "Cytotoxic_CD4_T_cells", "Naive_CD8_T_cells")
 
-coloc_results <- read.csv("coloc_sigresults_GCST90270940_checksigeQTL.csv")
+coloc_results <- read.csv("coloc_sigresults.csv")
 coloc_results$lead_H4_variant_REF_ALT <- paste(
   coloc_results$lead_H4_variant,
   coloc_results$lead_H4_variant_GTF_REF,

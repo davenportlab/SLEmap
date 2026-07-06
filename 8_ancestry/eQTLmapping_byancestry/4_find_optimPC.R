@@ -1,16 +1,13 @@
 ##eQTL by ancestry - identify optim PCs
 
-celltypes <- read.csv("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/3_eQTL_prep/celltypes_over20cells_over100donors.csv")
-celltypes <- celltypes[celltypes$numdonor_over20 > 100,]
-
 eQTLresults <- data.frame(matrix(0, ncol = 5))
 colnames(eQTLresults) <- c("Ancestry","Celltype","PCs","num_eGenes","optim")
-celltypes <- celltypes$unique.seurat.Celltype_level1.
+celltypes <- c("CD56Bright_NK_cells","CD56Dim_NK_cells","Classical_Monocytes","CM_CD4_T_cells","Cytotoxic_CD4_T_cells","EM_CD4_T_cells","Naive_CD4_T_cells","Regulatory_CD4_T_cells","CM_CD8_T_cells","EM_CD8_T_cells", "Naive_CD8_T_cells","TEMRA","DN_T_cells","Memory_B_cells","Naive_B_cells")
 ancestry <- c("AFR","EUR","SAS")
 PCs <- c(0,5,10,15,20,25,30,35,40,45,50)
 
 for (j in ancestry){
-  basedir <- paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/20_ancestry_coloc/",j,"/FindPCs/results")
+  basedir <- paste0("/path/ancestry_coloc/",j,"/FindPCs/results")
   for (i in celltypes){
     optim <- read.table(paste0(basedir,"/TensorQTL_eQTLS/dMean__",i,"_all/OPTIM_pcs/base_output__base/optim_pcs.txt"))
     optim <- optim[1,1]
@@ -58,7 +55,7 @@ for (j in ancestry){
   }
 }
 
-pdf(file = "/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/20_ancestry_coloc/expPCs.pdf",width=10,height=4)
+pdf(file = "/path/ancestry_coloc/expPCs.pdf",width=10,height=4)
 for(i in 1:length(plotlist)){
   print(plotlist[[i]])
 }
@@ -74,7 +71,7 @@ ancestry <- c("AFR","EUR","SAS")
 PCs <- c(0,5,10,15,20,25,30,35,40,45,50)
 
 for (j in ancestry){
-  basedir <- paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/20_ancestry_coloc/",j,"/FindPCs_all/results")
+  basedir <- paste0("/path/ancestry_coloc/",j,"/FindPCs_all/results")
   for (i in celltypes){
     optim <- read.table(paste0(basedir,"/TensorQTL_eQTLS/dMean__",i,"_all/OPTIM_pcs/base_output__base/optim_pcs.txt"))
     optim <- optim[1,1]
@@ -182,4 +179,4 @@ optimPCs_ancestry$optimPCs[optimPCs_ancestry$ancestry=="AFR" & optimPCs_ancestry
 optimPCs_ancestry$optimPCs[optimPCs_ancestry$ancestry=="SAS" & optimPCs_ancestry$celltypes=="All"] <- 15
 optimPCs_ancestry$optimPCs[optimPCs_ancestry$ancestry=="EUR" & optimPCs_ancestry$celltypes=="All"] <- 20
 
-write.csv(optimPCs_ancestry,"/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/20_ancestry_coloc/optimPCs.csv",row.names=F)
+write.csv(optimPCs_ancestry,"/path/ancestry_coloc/optimPCs.csv",row.names=F)

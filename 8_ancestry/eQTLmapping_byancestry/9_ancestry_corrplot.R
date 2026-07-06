@@ -4,7 +4,7 @@ library(ggplot2)
 library(tidyverse)
 library(ggpubr)
 
-coloc <- read.csv(paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/23_locus_breaker_coloc/outputs/1_csvfiles/coloc_sigresults_GCST90270940_checksigeQTL.csv"))
+coloc <- read.csv(paste0("/path/coloc/outputs/1_csvfiles/coloc_sigresults.csv"))
 
 coloc_ancestry <- coloc[c("cell_type","gene_id","lead_H4_variant","lead_H4_SNP.PP.H4","gene_symbol","lead_H4_variant_slope","lead_H4_variant_pval","lead_H4_variant_GTF_REF","lead_H4_variant_GTF_ALT")]
 coloc_ancestry$MAIN_lead_H4_variant_slope <- NA
@@ -27,16 +27,16 @@ for(i in 1:nrow(coloc)){
   
   ##find af in all
   if(celltype == "All"){
-    nominal=fread(paste0("grep ",gene," ","/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsoft_allSNP_allcells/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/cis_nominal1.cis_qtl_pairs.",gene_chr,".tsv"))
+    nominal=fread(paste0("grep ",gene," ","/path/eQTLresults/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/cis_nominal1.cis_qtl_pairs.",gene_chr,".tsv"))
   }else{
-    nominal=fread(paste0("grep ",gene," ","/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsort_allSNP/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/cis_nominal1.cis_qtl_pairs.",gene_chr,".tsv"))
+    nominal=fread(paste0("grep ",gene," ","/path/eQTLresults/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/cis_nominal1.cis_qtl_pairs.",gene_chr,".tsv"))
   }
   colnames(nominal) <- c("phenotype_id","variant_id","start_distance","af","ma_samples","ma_count","pval_nominal","slope","slope_se")
   coloc_ancestry$MAIN_lead_H4_variant_slope[i] <- nominal$slope[nominal$phenotype_id == gene & nominal$variant_id == colocsnp]
   coloc_ancestry$MAIN_lead_H4_variant_AF[i] <- nominal$af[nominal$phenotype_id == gene & nominal$variant_id == colocsnp]
   
   ###find B in AFR
-  nominal<- fread(paste0("grep ",gene," ","/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/20_ancestry_coloc/AFR/ManualPCs/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/cis_nominal1.cis_qtl_pairs.",gene_chr,".tsv"))
+  nominal<- fread(paste0("grep ",gene," ","/path/ancestry_coloc/AFR/ManualPCs/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/cis_nominal1.cis_qtl_pairs.",gene_chr,".tsv"))
   colnames(nominal) <- c("phenotype_id","variant_id","start_distance","af","ma_samples","ma_count","pval_nominal","slope","slope_se")
   if(length(nominal$slope[nominal$phenotype_id == gene & nominal$variant_id == colocsnp]) ==0){
     coloc_ancestry$AFR_lead_H4_variant_slope[i] <- NA
@@ -47,7 +47,7 @@ for(i in 1:nrow(coloc)){
   }
   
   ###find B in EUR
-  nominal<- fread(paste0("grep ",gene," ","/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/20_ancestry_coloc/EUR/ManualPCs/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/cis_nominal1.cis_qtl_pairs.",gene_chr,".tsv"))
+  nominal<- fread(paste0("grep ",gene," ","/path/ancestry_coloc/EUR/ManualPCs/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/cis_nominal1.cis_qtl_pairs.",gene_chr,".tsv"))
   colnames(nominal) <- c("phenotype_id","variant_id","start_distance","af","ma_samples","ma_count","pval_nominal","slope","slope_se")
   if(length(nominal$slope[nominal$phenotype_id == gene & nominal$variant_id == colocsnp]) ==0){
     coloc_ancestry$EUR_lead_H4_variant_slope[i] <- NA
@@ -58,7 +58,7 @@ for(i in 1:nrow(coloc)){
   }
   
   ###find B in SAS
-  nominal<- fread(paste0("grep ",gene," ","/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/20_ancestry_coloc/SAS/ManualPCs/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/cis_nominal1.cis_qtl_pairs.",gene_chr,".tsv"))
+  nominal<- fread(paste0("grep ",gene," ","/path/ancestry_coloc/SAS/ManualPCs/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/cis_nominal1.cis_qtl_pairs.",gene_chr,".tsv"))
   colnames(nominal) <- c("phenotype_id","variant_id","start_distance","af","ma_samples","ma_count","pval_nominal","slope","slope_se")
   if(length(nominal$slope[nominal$phenotype_id == gene & nominal$variant_id == colocsnp]) ==0){
     coloc_ancestry$SAS_lead_H4_variant_slope[i] <- NA
@@ -70,8 +70,8 @@ for(i in 1:nrow(coloc)){
   
 }
 
-write.csv(coloc_ancestry,'/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/23_locus_breaker_coloc/outputs/1_csvfiles/coloc_ancestry_slopeaf.csv',row.names=F)
-coloc_ancestry <- read.csv('/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/23_locus_breaker_coloc/outputs/1_csvfiles/coloc_ancestry_slopeaf.csv')
+write.csv(coloc_ancestry,'/path/coloc/outputs/1_csvfiles/coloc_ancestry_slopeaf.csv',row.names=F)
+coloc_ancestry <- read.csv('/path/coloc/outputs/1_csvfiles/coloc_ancestry_slopeaf.csv')
 
 View(coloc_ancestry[coloc_ancestry$AFR_lead_H4_variant_slope * coloc_ancestry$EUR_lead_H4_variant_slope < 0,])
 View(coloc_ancestry[coloc_ancestry$AFR_lead_H4_variant_slope * coloc_ancestry$SAS_lead_H4_variant_slope < 0,])
@@ -105,25 +105,25 @@ p2 <- ggplot(coloc_ancestry[is.na(coloc_ancestry$EUR_lead_H4_variant_slope) == F
 p3 <- ggplot(coloc_ancestry[is.na(coloc_ancestry$AFR_lead_H4_variant_slope) == F & is.na(coloc_ancestry$SAS_lead_H4_variant_slope) == F,], aes(x=SAS_lead_H4_variant_slope, y=AFR_lead_H4_variant_slope,color=abs(SAS_lead_H4_variant_AF-EUR_lead_H4_variant_AF))) +theme_classic()+scale_color_viridis_c(limits = c(global_min, global_max),name="AF difference")+ geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey")+geom_hline(yintercept = 0, color = "black") + geom_vline(xintercept = 0, color = "black") + geom_point(alpha=0.75)+ stat_cor(method = "pearson")+xlab("eQTL beta in SAS") + ylab("eQTL beta in AFR")
 ggarrange(p2,p1,p3,common.legend = T,nrow=1,ncol=3,legend="right")
 
-ggsave("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/23_locus_breaker_coloc/outputs/0_plots/Beta_correlation_coloc.pdf",height=3.5,width=12)
+ggsave("/path/coloc/outputs/0_plots/Beta_correlation_coloc.pdf",height=3.5,width=12)
 
 
 ###making figs of examples
 ##PLCL1
 library(data.table)
-metadata <- read.csv("/lustre/scratch127/open-targets/Projects/OTAR2064/working/slemap/phenotype/combined_data_tidied_sc_used_w_KING_28_08_25.csv")
+metadata <- read.csv("/path/KING.csv")
 
 getplot_ancestry <- function(celltype,Gene,SNP,runSNP){
-  setwd("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/3_eQTL_prep/SNPs")
+  setwd("/path/SNPs")
   if(celltype =="All"){
-    eQTLrun <- "/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsoft_allSNP_allcells/"
+    eQTLrun <- "/path/eQTLresults/"
     norm_data_dir <- paste0(eQTLrun,"/results/norm_data/dMean__",celltype,"_all/")
     mean <- read.table(paste0(norm_data_dir,"normalised_phenotype.tsv"),sep="\t",header=T,row.names = 1)
     covariates <- read.table(paste0(eQTLrun,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_input/base_output__base/Covariates.tsv"),fill=T)
     optimPCs <- read.table(paste0(eQTLrun,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output__base/optim_pcs.txt"))
     
   }else{
-    eQTLrun <- "/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsort_allSNP/"
+    eQTLrun <- "/path/eQTLresults/"
     norm_data_dir <- paste0(eQTLrun,celltype,"/results/norm_data/dMean__",celltype,"_all/")
     mean <- read.table(paste0(norm_data_dir,"normalised_phenotype.tsv"),sep="\t",header=T,row.names = 1)
     covariates <- read.table(paste0(eQTLrun,celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_input/base_output__base/Covariates.tsv"),fill=T)
@@ -132,7 +132,7 @@ getplot_ancestry <- function(celltype,Gene,SNP,runSNP){
   
   SNPs <- setNames(data.frame(unlist(strsplit(SNP, "_"))[1], unlist(strsplit(SNP, "_"))[2], unlist(strsplit(SNP, "_"))[2]), c('chr_name', 'chrom_start','chrom_end'))
   if(runSNP == T){
-    system2("bash", args = c("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/3_eQTL_prep/SNPs/genotype.sh", SNPs$chr_name, SNPs$chrom_start,SNPs$chrom_end,SNP))
+    system2("bash", args = c("/path/genotype.sh", SNPs$chr_name, SNPs$chrom_start,SNPs$chrom_end,SNP))
   }
   ## get genotype
   indiv <- read.table(paste0(SNP,".012.indv"),sep="\t")
@@ -195,26 +195,13 @@ getplot_ancestry <- function(celltype,Gene,SNP,runSNP){
   
 }
 
-coloc <- read.csv(paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/23_locus_breaker_coloc/outputs/1_csvfiles/coloc_sigresults_GCST90270940_checksigeQTL.csv"))
+coloc <- read.csv(paste0("/path/coloc/outputs/1_csvfiles/coloc_sigresults.csv"))
 
 coloc[coloc$gene_symbol == "PLCL1" & coloc$cell_type == "EM_CD8_T_cells",]
 getplot_ancestry(celltype="EM_CD8_T_cells",Gene="ENSG00000115896",SNP="chr2_198035639_G_A",runSNP=F)
-ggsave("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/23_locus_breaker_coloc/outputs/0_plots/forpaper/PLCL1_EM_CD8_T_cells_ancestry.pdf",width=7,height=3)
-
-coloc[coloc$gene_symbol == "IL10RA" & coloc$cell_type == "CM_CD4_T_cells",]
-getplot_ancestry(celltype="CM_CD4_T_cells",Gene="ENSG00000110324",SNP="chr11_118009424_C_T",runSNP=F)
+ggsave("/path/coloc/outputs/0_plots/forpaper/PLCL1_EM_CD8_T_cells_ancestry.pdf",width=7,height=3)
 
 coloc[coloc$gene_symbol == "CD58" & coloc$cell_type == "Memory_B_cells",]
 getplot_ancestry(celltype="Memory_B_cells",Gene="ENSG00000116815",SNP="chr1_116529902_T_C",runSNP=F)
-ggsave("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/23_locus_breaker_coloc/outputs/0_plots/forpaper/CD58_Memory_B_cells_ancestry.pdf",width=7,height=3)
-
-
-slope <- read.csv("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/23_locus_breaker_coloc/outputs/1_csvfiles/coloc_ancestry_slopeaf.csv")
-slope_opposite <- slope[slope$AFR_lead_H4_variant_slope * slope$EUR_lead_H4_variant_slope < 0,]
-slope_opposite <- slope_opposite[is.na(slope_opposite$cell_type) == F,]
-slope_opposite[slope_opposite$gene_symbol == "PPP1R14B" & slope_opposite$cell_type == "All",]
-coloc[coloc$gene_symbol == "PPP1R14B" & coloc$cell_type == "All",]
-getplot_ancestry(celltype="All",Gene="ENSG00000173457",SNP="chr11_64360951_G_T",runSNP=F)
-ggsave("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/23_locus_breaker_coloc/outputs/0_plots/forpaper/PPP1R14B_All_cells_ancestry.pdf",width=7,height=3)
-
+ggsave("/path/coloc/outputs/0_plots/forpaper/CD58_Memory_B_cells_ancestry.pdf",width=7,height=3)
 
