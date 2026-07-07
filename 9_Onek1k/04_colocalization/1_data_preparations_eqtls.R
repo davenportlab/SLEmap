@@ -1,20 +1,18 @@
 library(tidyverse)
 library(data.table)
 
-DIR_tensorQTL="/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/12_Onek1k/eQTLmapping/eQTL_mapping_manualPCs"
-DIR_tensorQTL_all="/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/12_Onek1k/eQTLmapping/eQTL_mapping_manualPCs_allcells"
+DIR_tensorQTL="/path/Onek1k/eQTLmapping/eQTL_mapping_manualPCs"
+DIR_tensorQTL_all="/path/Onek1k/eQTLmapping/eQTL_mapping_manualPCs_allcells"
 
-mainDir=paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/12_Onek1k/Colocalisation/load_eqtls_data")
-
-#DIR_MAIN="/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/wl2/colocalization/"
+mainDir=paste0("/path/Onek1k/Colocalisation/load_eqtls_data")
 
 ####################################################
 ## 1. load data: bim_and_maf
 ####################################################
 
 ##To get maf and N_CHR info for coloc run the following
-#plink2 --vcf /lustre/scratch127/open-targets/Projects/OTAR2064/working/users/eb30/results/oneK1K_imputation/Imputation_TOPMed_run3/plink_conversion_QC2/onek1k_imputed_allchr_afterQC2_new_filter.vcf.gz --freq --update-sex /lustre/scratch127/open-targets/Projects/OTAR2064/working/users/eb30/results/oneK1K_imputation/Imputation_TOPMed_run3/plink_conversion_QC2/sex.txt --out /lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/12_Onek1k/Genotypes/freq/onek1k_imputed_allchr_afterQC2_new_filter
-freq <- read.table("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/12_Onek1k/Genotypes/freq/onek1k_imputed_allchr_afterQC2_new_filter.afreq")
+#plink2 --vcf path/onek1k_imputed_allchr_afterQC2_new_filter.vcf.gz --freq --update-sex /path/sex.txt --out /path/Onek1k/Genotypes/freq/onek1k_imputed_allchr_afterQC2_new_filter
+freq <- read.table("/path/Onek1k/Genotypes/freq/onek1k_imputed_allchr_afterQC2_new_filter.afreq")
 colnames(freq) <- c("CHROM","variant_id","REF","ALT","ALT_FREQS","OBS_CT")
 freq <- freq %>%
   mutate(
@@ -34,7 +32,7 @@ all_cis_eqtl_conditional <- list.files(path=DIR_tensorQTL,
                                        recursive = T,
                                        full.names = T)
 all_cis_eqtl_conditional <- all_cis_eqtl_conditional[!grepl("/work/", all_cis_eqtl_conditional)]
-all_cis_eqtl_conditional <- append(all_cis_eqtl_conditional,"/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/12_Onek1k/eQTLmapping/eQTL_mapping_manualPCs_allcells/results/TensorQTL_eQTLS/dMean__All_all/OPTIM_pcs/base_output/base/Cis_eqtls_independent.tsv")
+all_cis_eqtl_conditional <- append(all_cis_eqtl_conditional,"/path/Onek1k/eQTLmapping/eQTL_mapping_manualPCs_allcells/results/TensorQTL_eQTLS/dMean__All_all/OPTIM_pcs/base_output/base/Cis_eqtls_independent.tsv")
 
 all_cis_eqtl_conditional2 <- data.frame(cell_type=gsub(".*dMean\\_\\_(.*)\\_all\\/OPT.*", "\\1",all_cis_eqtl_conditional),file=all_cis_eqtl_conditional)
 

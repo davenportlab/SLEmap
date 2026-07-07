@@ -1,9 +1,8 @@
 params{
     method='single_cell'
-    input_vcf='/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/eb30/results/oneK1K_imputation/Imputation_TOPMed_run3/plink_conversion_QC2/onek1k_imputed_allchr_afterQC2_new_filter.vcf.gz' //vcf with genotype imputation quality > 0.8
-    // genotype_phenotype_mapping_file='/lustre/scratch126/opentargets/opentargets/OTAR2064/working/users/hj10/Results/2_YASCP_final/5_QC_afterHLA_afterClusterremoval/QTLite/genotype_phenotype.txt'
-    annotation_file = '/nfs/srpipe_references/downloaded_from_10X/refdata-gex-GRCh38-2020-A/genes/genes.gtf'
-    phenotype_file = '/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/eb30/results/onek1K_raw_eQTL_input.h5ad'
+    input_vcf='/path/onek1k_input/onek1k_imputed_allchr_afterQC2_new_filter.vcf.gz' //vcf with genotype imputation quality > 0.8
+    annotation_file = '/path/downloaded_from_10X/refdata-gex-GRCh38-2020-A/genes/genes.gtf'
+    phenotype_file = '/path/onek1k_input/onek1K_raw_eQTL_input.h5ad'
     aggregation_columns='Celltype_level0'
     gt_id_column='donor_id'
     sample_column='donor_id'
@@ -24,7 +23,7 @@ params{
     outdir='results'
     maf=0.05
     dMean_norm_method = 'cp10k'
-    plink2_filters = "--snps-only --update-sex /lustre/scratch127/open-targets/Projects/OTAR2064/working/users/eb30/results/oneK1K_imputation/Imputation_TOPMed_run3/plink_conversion_QC2/sex.txt --rm-dup exclude-all --merge-par --lax-chrx-import" //merge-par and lax-chrx-import added because the pseudoautosomal region can be treated like any other region of the X chr since all individuals are female. In the plink2 version we use (a.5.12), only using merge-par would produce an error 
+    plink2_filters = "--snps-only --update-sex /path/onek1k/sex.txt --rm-dup exclude-all --merge-par --lax-chrx-import" //merge-par and lax-chrx-import added because the pseudoautosomal region can be treated like any other region of the X chr since all individuals are female. In the plink2 version we use (a.5.12), only using merge-par would produce an error 
     bcftools_filters = '--max-alleles 2 -m2 -M2 -v snps' // removed --known to run on all variants (with updatedIDs in vcf file, it should run the same with both with/without --known)
     
     copy_mode = 'copy' //no creating symlinks, instead we copy
@@ -51,8 +50,6 @@ params{
         // subset_genotypes_to_available=false // if true, then the expression data will be first processed and then the samples availbale in all the expression data will be subset from genotype files
         // apply_bcftools_filters=true // if true and vcf file is provided then preprocessing will be done on the files.
         use_gt_dosage = true // whether to use dosage. This will convert the vcf/bed to pgen
-        // preprocessed_bed_file='/lustre/scratch127/humgen/teams/hgi/mo11/tmp_projects127/cardinal_QTLs/ELGH/v2/results/genotypes/plink_genotypes_bed' //if user already has a bed file then this can be used instead of vcf file, and it will avoid the conversion, this can also be taken from the results/genotypes/plink_genotypes_bed 
-        // preprocessed_pgen_file='/lustre/scratch127/humgen/teams/hgi/mo11/tmp_projects127/cardinal_QTLs/ELGH/v4_paki_250/results_all/genotypes/plink_genotypes_bgen' //if user already has a pgen file then this can be used instead of vcf file, and it will avoid the conversion, this can also be taken from the results/genotypes/plink_genotypes_pgen
     }
     use_gt_dosage = true
 
@@ -60,7 +57,6 @@ params{
         nr_phenotype_pcs = '0,5,10,15,20,25,30,35,40,45,50' // this is used for Tensorqtl
         nr_genotype_pcs = 4
         extra_covariates_file = ''
-        // extra_covariates_file = '/lustre/scratch126/opentargets/opentargets/OTAR2064/working/users/hj10/Results/2_YASCP_final/5_QC_afterHLA_afterClusterremoval/QTLite/eQTL_covariates_date_new2.txt'
     }
 
 }

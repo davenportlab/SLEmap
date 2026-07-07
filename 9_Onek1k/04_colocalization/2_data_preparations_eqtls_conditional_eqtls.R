@@ -1,17 +1,12 @@
 library(tidyverse)
 library(data.table)
 
-#DIR_MAIN="/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/wl2/colocalization/"
-mainDir=paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/12_Onek1k/Colocalisation/load_eqtls_data")
+mainDir=paste0("/path/Onek1k/Colocalisation/load_eqtls_data")
 
 ####################################################
 ## 1. load data: bim_and_maf
 ####################################################
-# source(paste0(DIR_MAIN,
-#               "/scripts/00_functions/load_data.R"))
-# print(dim(bim_and_maf))
-
-freq <- read.table("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/12_Onek1k/Genotypes/freq/onek1k_imputed_allchr_afterQC2_new_filter.afreq")
+freq <- read.table("/path/Onek1k/Genotypes/freq/onek1k_imputed_allchr_afterQC2_new_filter.afreq")
 colnames(freq) <- c("CHROM","variant_id","REF","ALT","ALT_FREQS","OBS_CT")
 freq <- freq %>%
   mutate(
@@ -27,12 +22,11 @@ freq <- freq %>%
 ####################################################
 cell_types <- c("CD56Bright_NK_cells","CD56Dim_NK_cells","Classical_Monocytes","CM_CD4_T_cells","EM_CD4_T_cells","Naive_CD4_T_cells","Regulatory_CD4_T_cells","CM_CD8_T_cells","EM_CD8_T_cells", "Naive_CD8_T_cells","TEMRA","Memory_B_cells","Naive_B_cells","Nonclassical_Monocytes","MAIT_and_GammaDelta_T_cells","All")
 
-#cell_types <- "CM_CD4_T_cells"
 
 ####################################################
 ## 3. merge conditional signals by cell types
 ####################################################
-DIR_independent_nominal_p="/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/12_Onek1k/Colocalisation/indep_coloc"
+DIR_independent_nominal_p="/path/Onek1k/Colocalisation/indep_coloc"
 
 for(cell_type in cell_types){
   print (cell_type)
@@ -59,10 +53,6 @@ for(cell_type in cell_types){
     dplyr::mutate(variant_id=gsub("(chr\\d+\\_\\d+)\\_.*", "\\1", variant_id_v2)) %>%
     separate_wider_delim(variant_id_v2,delim = "_",names = c("CHROM", "POS", "GTF_ALT", "GTF_REF"),cols_remove = FALSE) %>% #REF ALT is flipped on purpose due to legacy code. This is flipped back before interpretation. 
     merge(., freq[,c("variant_id","OBS_CT","minor_allele","minor_allele_frq")], by.x="variant_id_v2",by.y="variant_id")
-  #merge(., get_N_CHR, by="variant_id_v2") %>%   # add 'N_CHR' from get_N_CHR
-  #merge(., bim_and_maf[, c("chr_pos_variants", "N_CHR", 
-  #                         "GTF_REF", "GTF_ALT", "minor_allele_frq")], 
-  #      by.x="variant_id_v2", by.y="chr_pos_variants")
   
   dim(eQTL_INPUT_2)
   head(eQTL_INPUT_2)

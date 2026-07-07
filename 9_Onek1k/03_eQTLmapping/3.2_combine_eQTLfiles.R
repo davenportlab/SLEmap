@@ -1,47 +1,33 @@
-
+###make eQTL result files combined across cell types
 
 alltested <- data.frame()
 for(celltype in c("CD56Bright_NK_cells", "CD56Dim_NK_cells", "Classical_Monocytes", "CM_CD4_T_cells", "EM_CD4_T_cells", "Naive_CD4_T_cells", "Regulatory_CD4_T_cells", "CM_CD8_T_cells", "EM_CD8_T_cells", "Naive_CD8_T_cells", "TEMRA", "Memory_B_cells", "Naive_B_cells", "MAIT_and_GammaDelta_T_cells", "Nonclassical_Monocytes")){
-  qval <- read.table(paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/12_Onek1k/eQTLmapping/eQTL_mapping_manualPCs/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/Cis_eqtls_qval.tsv"),fill=T,header=T)
+  qval <- read.table(paste0("/path/onek1k_eQTLresults/ManualPCs/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/Cis_eqtls_qval.tsv"),fill=T,header=T)
   qval$celltype <- celltype
   alltested <- rbind(alltested,qval)
   
 }
 
-qval <- read.table("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/12_Onek1k/eQTLmapping/eQTL_mapping_manualPCs_allcells/results/TensorQTL_eQTLS/dMean__All_all/OPTIM_pcs/base_output/base/Cis_eqtls_qval.tsv",fill=T,header=T)
+qval <- read.table("/path/onek1k_eQTLresults/ManualPCs/results/TensorQTL_eQTLS/dMean__All_all/OPTIM_pcs/base_output/base/Cis_eqtls_qval.tsv",fill=T,header=T)
 qval$celltype <- "All"
 alltested <- rbind(alltested,qval)
 
-write.csv(alltested,"/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/12_Onek1k/eQTLmapping/alltested_genes_onek1k.csv",row.names=F)
+write.csv(alltested,"/path/onek1k_eQTLresults/alltested_genes_onek1k.csv",row.names=F)
 
-write.csv(alltested[alltested$qval < 0.05,],"/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/12_Onek1k/eQTLmapping/allsig_genes_onek1k.csv",row.names=F)
+write.csv(alltested[alltested$qval < 0.05,],"/path/onek1k_eQTLresults/allsig_genes_onek1k.csv",row.names=F)
 
-###counting numbers of genes tested, egenes, indep eQTL 
-alltested <- read.csv("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/12_Onek1k/eQTLmapping/alltested_genes_onek1k.csv")
-length(unique(alltested$phenotype_id))
+## get indep results all for onek1k
+allindep <- data.frame()
+for(celltype in c("CD56Bright_NK_cells","CD56Dim_NK_cells","Classical_Monocytes","CM_CD4_T_cells","EM_CD4_T_cells","Naive_CD4_T_cells","Regulatory_CD4_T_cells","CM_CD8_T_cells","EM_CD8_T_cells", "Naive_CD8_T_cells","TEMRA","Memory_B_cells","Naive_B_cells","Nonclassical_Monocytes","MAIT_and_GammaDelta_T_cells")){
+   indepresults <- read.table(paste0("/path/onek1k_eQTLresults/ManualPCs/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/Cis_eqtls_independent.tsv"),header=T)
+   indepresults$celltype <- celltype
+   allindep <- rbind(allindep,indepresults)
+}
 
-length(unique(alltested[alltested$qval < 0.05,]$phenotype_id))
-
-allindependent <- read.csv("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/12_Onek1k/Cis_eqtls_independent_allcelltypes_wbulklike.csv")
-
-length(unique(paste0(allindependent$phenotype_id,allindependent$celltype)))
-
-
-
-###slemap
-slemap_tested <- read.csv("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsort_allSNP/1_csvfiles/genestested_wbulklike.csv")
-length(unique(slemap_tested$phenotype_id))
-
-slemap_sig <- read.csv("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsort_allSNP/1_csvfiles/genessig_wbulklike.csv")
-length(unique(slemap_sig$phenotype_id))
-
-slemap_indep <- read.csv("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsort_allSNP/1_csvfiles/conditionaleQTL.csv")
-table(slemap_indep$celltype)
-table(slemap_indep$rank_new)
-
-slemap_indep_allcells <- read.table("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/5_eQTL_SLEmap_manualPCs_X_1.6_fixsoft_allSNP_allcells/results/TensorQTL_eQTLS/dMean__All_all/OPTIM_pcs/base_output/base/Cis_eqtls_independent.tsv",sep="\t",header=T)
-table(slemap_indep_allcells$rank)
-head(slemap_indep)
+indepresults <- read.table("/path/onek1k_eQTLresults/ManualPCs/results/TensorQTL_eQTLS/dMean__All_all/OPTIM_pcs/base_output/base/Cis_eqtls_independent.tsv",header=T)
+indepresults$celltype <- "All"
+allindep <- rbind(allindep,indepresults)
+write.csv(allindep, "/path/onek1k_eQTLresults/Cis_eqtls_independent_allcelltypes_wbulklike.csv")
 
 
 ### make summary file
@@ -50,7 +36,7 @@ library(ggplot2)
 library(scales)
 
 #get number of donors tested for each cell type
-seurat <- readRDS("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/12_Onek1k/onek1K_eQTL_input_seurat.RDS")
+seurat <- readRDS("/path/onek1k_input/onek1K_eQTL_input_seurat.RDS")
 
 numall2 <- data.frame(unique(seurat$Celltype_level1))
 numall2$numdonor_over20 <- NA
@@ -92,8 +78,8 @@ colnames(genestested) <- c("phenotype_id","celltype")
 genessig <- as.data.frame(matrix(ncol=6))
 colnames(genessig) <- c("phenotype_id","celltype","variant_id","start_distance","af","slope")
 
-resultsdir <- "/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/12_Onek1k/eQTLmapping/eQTL_mapping_manualPCs/"
-resultsdir_all <- "/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/12_Onek1k/eQTLmapping/eQTL_mapping_manualPCs_allcells"
+resultsdir <- "/path/onek1k_eQTLresults/"
+resultsdir_all <- "/path/onek1k_eQTLresults/"
 for (i in 1:nrow(eGenesummary)){
   celltype <- eGenesummary$celltype[[i]]
   optimPCs <- eGenesummary$optimPCs[[i]]
@@ -115,5 +101,5 @@ for (i in 1:nrow(eGenesummary)){
   eGenesummary[i, 'numGenes_conditionalsig'] <- nrow(sigegene_conditional)
 }
 
-write.csv(eGenesummary,paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/12_Onek1k/eQTLmapping/","eGenesummary_Onek1k.csv"))
+write.csv(eGenesummary,paste0("/path/onek1k_eQTLresults/","eGenesummary_Onek1k.csv"))
 

@@ -1,43 +1,22 @@
 ### get conditionally independent eQTL mapping results from the sig results outputted from tensorQTL - for onek1k
-
-## before running this, /lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/12_Onek1k/Genotypes/byCHR/split_chr.sh has been run to chop up the vcf file by chromosome - done
-## also make directories for outputs by running /lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/12_Onek1k/Colocalisation/indep_coloc/makedirectories.sh
-# to run this file with each cell type in parallel: bash /lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Scripts/12_Onek1k/4_prep_conditional_analysis_forcoloc_onek1k.sh
+## before running this, chop up the vcf file by chromosome, make directories for outputs
+#run in parallel through cell types
 
 library(tidyr)
 library(dplyr)
 library(data.table)
 
-## get indep results all for onek1k
-# allindep <- data.frame()
-# for(celltype in c("CD56Bright_NK_cells","CD56Dim_NK_cells","Classical_Monocytes","CM_CD4_T_cells","EM_CD4_T_cells","Naive_CD4_T_cells","Regulatory_CD4_T_cells","CM_CD8_T_cells","EM_CD8_T_cells", "Naive_CD8_T_cells","TEMRA","Memory_B_cells","Naive_B_cells","Nonclassical_Monocytes","MAIT_and_GammaDelta_T_cells")){
-#   indepresults <- read.table(paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/12_Onek1k/eQTLmapping/eQTL_mapping_manualPCs/",celltype,"/results/TensorQTL_eQTLS/dMean__",celltype,"_all/OPTIM_pcs/base_output/base/Cis_eqtls_independent.tsv"),header=T)
-#   indepresults$celltype <- celltype
-#   allindep <- rbind(allindep,indepresults)
-# }
-# 
-# ##add all cells
-# indepresults <- read.table("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/12_Onek1k/eQTLmapping/eQTL_mapping_manualPCs_allcells/results/TensorQTL_eQTLS/dMean__All_all/OPTIM_pcs/base_output/base/Cis_eqtls_independent.tsv",header=T)
-# indepresults$celltype <- "All"
-# allindep <- rbind(allindep,indepresults)
-# write.csv(allindep, "/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/12_Onek1k/Cis_eqtls_independent_allcelltypes_wbulklike.csv")
-
-#for testing
-# celltype <- "CD56Bright_NK_cells"
-# j <- "ENSG00000160213"
-# i <- 21
-
 # start here
 celltype <- commandArgs(trailingOnly = TRUE)
 if(celltype == "All"){
-  tensordir <- "/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/12_Onek1k/eQTLmapping/eQTL_mapping_manualPCs_allcells/"
+  tensordir <- "/path/onek1k_eQTLresults/ManualPCs/"
 }else{
-  tensordir <- paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/12_Onek1k/eQTLmapping/eQTL_mapping_manualPCs/",celltype)
+  tensordir <- paste0("/path/onek1k_eQTLresults/ManualPCs/",celltype)
 }
-resultdir <- paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/12_Onek1k/Colocalisation/indep_coloc/",celltype)
+resultdir <- paste0("/path/onek1k/Colocalisation/indep_coloc/",celltype)
 
 ###get genes with more than one indep signal
-sig_indep_all <- read.csv("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/12_Onek1k/Cis_eqtls_independent_allcelltypes_wbulklike.csv",row.names=1)
+sig_indep_all <- read.csv("/path/onek1k_eQTLresults/Cis_eqtls_independent_allcelltypes_wbulklike.csv",row.names=1)
 sig_indep_all <- sig_indep_all[sig_indep_all$celltype == celltype,]
 sig_indep <- sig_indep_all[sig_indep_all$rank ==2,] #get genes with at more than one independent result
 sig_indep <- sig_indep %>%
@@ -73,7 +52,7 @@ for (i in unique(sig_indep$chr)){
     write.table(sig_indep_chr_genes_snps_for1gene,row.names=F,col.names=F,quote=F, file=paste0(resultdir,"/snps/",j,"_snps.txt"))
     
     #get genotypes
-    system2("bash", args = c("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Scripts/12_Onek1k/SNPs/genotype_multisnps_onek1k.sh",i,celltype,j))
+    system2("bash", args = c("/path/genotype_multisnps_onek1k.sh",i,celltype,j))
     indiv <- read.table(paste0(resultdir,"/genotypes/",j,"_genotypes.012.indv"),sep="\t")
     genotype <- read.table(paste0(resultdir,"/genotypes/",j,"_genotypes.012.gz"),sep="\t",row.names = 1)
     row.names(genotype) <- indiv$V1
@@ -103,18 +82,3 @@ for (i in unique(sig_indep$chr)){
   
 }
 
-
-
-###check that all files were made
-# sig_indep_all <- read.csv("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/12_Onek1k/Cis_eqtls_independent_allcelltypes_wbulklike.csv",row.names=1)
-# sig_indep <- sig_indep_all[sig_indep_all$rank ==2,]
-# 
-# numfiles_made <- data.frame()
-# for(celltype in c("CD56Bright_NK_cells","CD56Dim_NK_cells","Classical_Monocytes","CM_CD4_T_cells","EM_CD4_T_cells","Naive_CD4_T_cells","Regulatory_CD4_T_cells","CM_CD8_T_cells","EM_CD8_T_cells", "Naive_CD8_T_cells","TEMRA","Memory_B_cells","Naive_B_cells","Nonclassical_Monocytes","MAIT_and_GammaDelta_T_cells","All")){
-#   resultdir <- paste0("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/12_Onek1k/Colocalisation/indep_coloc/",celltype)
-#   resultsdir_files <- list.files(paste0(resultdir,"/model/"))
-#   sig_indep_use <- sig_indep[sig_indep$celltype == celltype,]
-#   numfiles_made <- rbind(numfiles_made,c(celltype,length(resultsdir_files),nrow(sig_indep_use)))
-# }
-# colnames(numfiles_made) <- c("celltype","numfiles","numgenes_withindep")
-# all(numfiles_made$numfiles == numfiles_made$numgenes_withindep)
