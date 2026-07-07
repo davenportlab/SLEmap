@@ -20,7 +20,7 @@ for k in CD56Bright_NK_cells CD56Dim_NK_cells Classical_Monocytes CM_CD4_T_cells
 
     bsub -e logs/${k}.e -o logs/${k}.o -q normal -n 4 -M 100000 \
     -R "select[mem>100000] rusage[mem=100000] span[hosts=1]" \
-    singularity exec -B /lustre -B /software /path/hdf5tools.sif \
+    singularity exec -B /path -B /software /path/hdf5tools.sif \
     sos run /path/24_onek1k_locus_breaker_coloc/fastqtl_to_mash.ipynb \
         --data-list /path/onek1k_locus_breaker_coloc/mashr/input/merged_test_conditions/${k}.list \
         --gene-list "$gene_file" \

@@ -182,7 +182,7 @@ sc.pl.dotplot(protein_SLEmap, markers, groupby="Celltype_level2_forplots", stand
     "cDC", "pDC", "HSPC", "ILC"],save="CITEmarkers.pdf")
 
 ##CITEseq UMAP
-protein_SLEmap = sc.read("/lustre/scratch127/open-targets/Projects/OTAR2064/working/users/hj10/Results/2_YASCP_final/6_annotation/For_annotation_protein.h5ad")
+protein_SLEmap = sc.read("/path/YASCP_final/6_annotation/For_annotation_protein.h5ad")
 sc.pp.log1p(protein_SLEmap) 
 
 matplotlib.rcParams['pdf.fonttype'] = 42
