@@ -24,7 +24,7 @@ while IFS=$'\t' read -r n1 n2; do
 
     bsub -e logs/${n1}_${n2}.e -o logs/${n1}_${n2}.o -q normal -n 4 -M 100000 \
     -R "select[mem>100000] rusage[mem=100000] span[hosts=1]" \
-    singularity exec -B /lustre -B /software /path/hdf5tools.sif \
+    singularity exec -B /path -B /software /path/hdf5tools.sif \
     sos run /path/mash/fastqtl_to_mash.ipynb \
         --data-list /path/mashresults/input/merged_test_conditions/merged_test_conditions_${n1}_${n2}.list \
         --gene-list "$gene_file" \
