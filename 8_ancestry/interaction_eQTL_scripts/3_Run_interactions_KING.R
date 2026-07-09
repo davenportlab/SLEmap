@@ -11,7 +11,7 @@ library(jtools)
 library(lmtest)
 library(dplyr)
 
-conditional_ranks <- read.csv("5_eQTL_SLEmap_manualPCs_X_1.6_fixsort_allSNP/1_csvfiles/conditionaleQTL_simple.csv")
+conditional_ranks <- read.csv("eQTLresults/1_csvfiles/conditionaleQTL_simple.csv")
 lead_eqtl <- conditional_ranks[conditional_ranks$rank_new == 1, ]
 
 symbols_to_names <- read.csv("ensemblID_to_genesymbol.csv")

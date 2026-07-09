@@ -19,7 +19,7 @@ wgs_dir <- "WGS_data"
 for (celltype in celltypes_to_test){
   data_dir <- glue("Interactions_coloc_only/{celltype}")
   
-  qtlight_dir <- glue("5_eQTL_SLEmap_manualPCs_X_1.6_fixsort_allSNP/{celltype}")
+  qtlight_dir <- glue("eQTLresults/{celltype}")
   
   load(glue("{data_dir}/preprocess_files.rda"))
   

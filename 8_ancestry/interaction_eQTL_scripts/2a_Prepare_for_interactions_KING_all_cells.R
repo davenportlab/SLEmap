@@ -14,7 +14,7 @@ wgs_dir <- "WGS_data"
 
 data_dir <- glue("Interactions_coloc_only/all_cells")
 
-qtlight_dir <- glue("5_eQTL_SLEmap_manualPCs_X_1.6_fixsoft_allSNP_allcells/")
+qtlight_dir <- glue("eQTLresults/")
 
 load(glue("{data_dir}/preprocess_files.rda"))
 

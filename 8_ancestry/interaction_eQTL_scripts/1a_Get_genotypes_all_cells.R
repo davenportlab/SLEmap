@@ -24,7 +24,7 @@ write.csv(coloc_results, glue("Interactions_coloc_only/all_cells/coloc_results.c
 
 
 # QTLight output directory for celltype
-qtlight_dir <- glue("5_eQTL_SLEmap_manualPCs_X_1.6_fixsoft_allSNP_allcells/")
+qtlight_dir <- glue("eQTLresults/")
 
 # Get normalised and pseudobulked gene expression data
 gex <- read.delim(glue("{qtlight_dir}/results/norm_data/dMean__All_all/normalised_phenotype.tsv"))
