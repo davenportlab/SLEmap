@@ -28,7 +28,7 @@ for (celltype in celltypes_to_test){
   wgs_dir <- "WGS_data"
   
   # QTLight output directory for celltype
-  qtlight_dir <- glue("5_eQTL_SLEmap_manualPCs_X_1.6_fixsort_allSNP/{celltype}")
+  qtlight_dir <- glue("eQTLresults/{celltype}")
   
   # Get normalised and pseudobulked gene expression data
   gex <- read.delim(glue("{qtlight_dir}/results/norm_data/dMean__{celltype}_all/normalised_phenotype.tsv"))
